@@ -657,13 +657,32 @@ MacroBuiltin::cfg_handler (Location invoc_locus, AST::MacroInvocData &invoc)
 AST::Fragment
 MacroBuiltin::include_handler (Location invoc_locus, AST::MacroInvocData &invoc)
 {
+  bool has_error = false;
+  auto invoc_token_tree = invoc.get_delim_tok_tree();
+  MacroInvocLexer lex (invoc_token_tree.to_token_stream());
+  Parser<MacroInvocLexer> parser (lex);
+
+  auto last_token_id = macro_end_token(invoc_token_tree, parser);
+
+  auto expanded_expr = try_expand_many_expr(parser, last_token_id, invoc.get_expander(), has_error);
+  if (has_error)
+    return AST::Fragment::create_error();
+
+  auto pending_invocations = check_for_eager_invocations(expanded_expr);
+  if (!pending_invocations.empty()) {
+    return make_eager_builtin_invocation(AST::BuiltinMacro::Include, invoc_locus, invoc_token_tree, std::move (pending_invocations));
+  }
+  if (expanded_expr.size() != 1) {
+    rust_error_at(invoc_locus, "include! takes 1 argument");
+  }
+
   /* Get target filename from the macro invocation, which is treated as a path
      relative to the include!-ing file (currently being compiled).  */
-  auto lit_expr
-    = parse_single_string_literal (invoc.get_delim_tok_tree (), invoc_locus,
-				   invoc.get_expander ());
-  if (lit_expr == nullptr)
-    return AST::Fragment::create_error ();
+  auto lit_expr = try_extract_string_literal_from_fragment(invoc_locus, expanded_expr[0]);
+  if (nullptr == lit_expr) {
+    return AST::Fragment::create_error();
+  }
+  parser.skip_token(last_token_id);
 
   std::string filename
     = source_relative_path (lit_expr->as_string (), invoc_locus);
@@ -682,13 +701,13 @@ MacroBuiltin::include_handler (Location invoc_locus, AST::MacroInvocData &invoc)
 
   rust_debug ("Attempting to parse included file %s", target_filename);
 
-  Lexer lex (target_filename, std::move (target_file), linemap);
-  Parser<Lexer> parser (lex);
+  Lexer include_lex (target_filename, std::move (target_file), linemap);
+  Parser<Lexer> include_parser (include_lex);
 
-  auto parsed_items = parser.parse_items ();
-  bool has_error = !parser.get_errors ().empty ();
+  auto parsed_items = include_parser.parse_items ();
+  has_error = !include_parser.get_errors ().empty ();
 
-  for (const auto &error : parser.get_errors ())
+  for (const auto &error : include_parser.get_errors ())
     error.emit_error ();
 
   if (has_error)
