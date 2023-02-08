@@ -191,6 +191,22 @@ try_expand_many_expr (Parser<MacroInvocLexer> &parser,
   return result;
 }
 
+
+static std::vector<std::unique_ptr<AST::MacroInvocation>>
+check_for_eager_invocations (
+  std::vector<std::unique_ptr<AST::Expr>> &expressions)
+{
+  std::vector<std::unique_ptr<AST::MacroInvocation>> pending;
+
+  for (auto &expr : expressions)
+    if (expr->get_ast_kind () == AST::Kind::MACRO_INVOCATION)
+      pending.emplace_back (std::unique_ptr<AST::MacroInvocation> (
+	static_cast<AST::MacroInvocation *> (expr->clone_expr ().release ())));
+
+  return pending;
+}
+
+
 /* Parse a single string literal from the given delimited token tree,
    and return the LiteralExpr for it. Allow for an optional trailing comma,
    but otherwise enforce that these are the only tokens.  */
@@ -376,16 +392,31 @@ AST::Fragment
 MacroBuiltin::include_str_handler (Location invoc_locus,
 				   AST::MacroInvocData &invoc)
 {
-  /* Get target filename from the macro invocation, which is treated as a path
-     relative to the include!-ing file (currently being compiled).  */
-  auto lit_expr
-    = parse_single_string_literal (invoc.get_delim_tok_tree (), invoc_locus,
-				   invoc.get_expander ());
-  if (lit_expr == nullptr)
+  auto invoc_token_tree = invoc.get_delim_tok_tree();
+  MacroInvocLexer lex (invoc_token_tree.to_token_stream());
+  Parser<MacroInvocLexer> parser (lex);
+
+  auto last_token_id = macro_end_token (invoc_token_tree, parser);
+  bool has_error = false;
+
+  auto expanded_expr = try_expand_many_expr(parser, last_token_id, invoc.get_expander(), has_error);
+
+  if (has_error)
     return AST::Fragment::create_error ();
 
+  auto pending = check_for_eager_invocations (expanded_expr);
+  if (!pending.empty())
+    return make_eager_builtin_invocation(AST::BuiltinMacro::IncludeStr, invoc_locus, invoc_token_tree, std::move (pending));
+
+  /* Get target filename from the macro invocation, which is treated as a path
+     relative to the include!-ing file (currently being compiled).  */
+  if (expanded_expr.size() != 1) {
+    rust_error_at(invoc_locus, "%<include_str!%> takes 1 argument");
+    return AST::Fragment::create_error();
+  }
+
   std::string target_filename
-    = source_relative_path (lit_expr->as_string (), invoc_locus);
+    = source_relative_path (expanded_expr[0]->as_string (), invoc_locus);
 
   std::vector<uint8_t> bytes = load_file_bytes (target_filename.c_str ());
 
@@ -415,20 +446,6 @@ MacroBuiltin::compile_error_handler (Location invoc_locus,
   rust_error_at (invoc_locus, "%s", error_string.c_str ());
 
   return AST::Fragment::create_error ();
-}
-
-static std::vector<std::unique_ptr<AST::MacroInvocation>>
-check_for_eager_invocations (
-  std::vector<std::unique_ptr<AST::Expr>> &expressions)
-{
-  std::vector<std::unique_ptr<AST::MacroInvocation>> pending;
-
-  for (auto &expr : expressions)
-    if (expr->get_ast_kind () == AST::Kind::MACRO_INVOCATION)
-      pending.emplace_back (std::unique_ptr<AST::MacroInvocation> (
-	static_cast<AST::MacroInvocation *> (expr->clone_expr ().release ())));
-
-  return pending;
 }
 
 /* Expand builtin macro concat!(), which joins all the literal parameters
