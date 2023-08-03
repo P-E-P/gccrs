@@ -114,7 +114,7 @@ struct in_place_t {
 static constexpr in_place_t in_place{};
 #endif
 
-template <class T> class optional;
+template <class T> class [[nodiscard]] optional;
 
 namespace detail {
 #ifndef TL_TRAITS_MUTEX
@@ -1552,7 +1552,7 @@ auto optional_map_impl(Opt &&opt, F &&f) -> optional<monostate> {
 
 /// Specialization for when `T` is a reference. `optional<T&>` acts similarly
 /// to a `T*`, but provides more operations and shows intent more clearly.
-template <class T> class optional<T &> {
+template <class T> class [[nodiscard]] optional<T &> {
 public:
 // The different versions for C++14 and 11 are needed because deduced return
 // types are not SFINAE-safe. This provides better support for things like
