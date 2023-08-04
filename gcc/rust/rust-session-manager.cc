@@ -42,6 +42,7 @@
 #include "rust-early-name-resolver.h"
 #include "rust-name-resolution-context.h"
 #include "rust-early-name-resolver-2.0.h"
+#include "rust-late-name-resolver-2.0.h"
 #include "rust-cfg-strip.h"
 #include "rust-expand-visitor.h"
 #include "rust-unicode.h"
@@ -585,8 +586,10 @@ Session::compile_crate (const char *filename)
   if (last_step == CompileOptions::CompileStep::Expansion)
     return;
 
+  auto name_resolution_ctx = Resolver2_0::NameResolutionContext ();
   // expansion pipeline stage
-  expansion (parsed_crate);
+
+  expansion (parsed_crate, name_resolution_ctx);
   rust_debug ("\033[0;31mSUCCESSFULLY FINISHED EXPANSION \033[0m");
   if (options.dump_option_enabled (CompileOptions::EXPANSION_DUMP))
     {
@@ -603,7 +606,10 @@ Session::compile_crate (const char *filename)
     return;
 
   // resolution pipeline stage
-  Resolver::NameResolution::Resolve (parsed_crate);
+  if (flag_name_resolution_2_0)
+    Resolver2_0::Late (name_resolution_ctx).go (crate);
+  else
+    Resolver::NameResolution::Resolve (parsed_crate);
 
   if (options.dump_option_enabled (CompileOptions::RESOLUTION_DUMP))
     {
@@ -854,7 +860,7 @@ Session::injection (AST::Crate &crate)
 }
 
 void
-Session::expansion (AST::Crate &crate)
+Session::expansion (AST::Crate &crate, Resolver2_0::NameResolutionContext &ctx)
 {
   rust_debug ("started expansion");
 
@@ -877,8 +883,6 @@ Session::expansion (AST::Crate &crate)
   while (!fixed_point_reached && iterations < cfg.recursion_limit)
     {
       CfgStrip ().go (crate);
-
-      auto ctx = Resolver2_0::NameResolutionContext ();
 
       if (flag_name_resolution_2_0)
 	{
