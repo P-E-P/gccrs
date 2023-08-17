@@ -607,7 +607,7 @@ Session::compile_crate (const char *filename)
 
   // resolution pipeline stage
   if (flag_name_resolution_2_0)
-    Resolver2_0::Late (name_resolution_ctx).go (crate);
+    Resolver2_0::Late (name_resolution_ctx).go (parsed_crate);
   else
     Resolver::NameResolution::Resolve (parsed_crate);
 
