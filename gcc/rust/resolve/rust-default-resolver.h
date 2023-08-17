@@ -37,6 +37,9 @@ class DefaultResolver : public AST::ASTVisitor
 public:
   virtual ~DefaultResolver () {}
 
+  // Default visitor for function parameters
+  virtual void visit_function_param (AST::FunctionParam &);
+
   // First, our lexical scope expressions - these visit their sub nodes, always
   // these nodes create new scopes and ribs - they are often used to declare new
   // variables, such as a for loop's iterator, or a function's arguments

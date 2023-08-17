@@ -52,14 +52,18 @@ DefaultResolver::visit (AST::Module &module)
 }
 
 void
+DefaultResolver::visit_function_param (AST::FunctionParam &param)
+{
+  param.get_pattern ()->accept_vis (*this);
+  param.get_type ()->accept_vis (*this);
+}
+
+void
 DefaultResolver::visit (AST::Function &function)
 {
   auto def_fn = [this, &function] () {
     for (auto &param : function.get_function_params ())
-      {
-	param.get_pattern ()->accept_vis (*this);
-	param.get_type ()->accept_vis (*this);
-      }
+      visit_function_param (param);
 
     function.get_definition ()->accept_vis (*this);
   };
@@ -72,10 +76,7 @@ DefaultResolver::visit (AST::Method &method)
 {
   auto def_fn = [this, &method] () {
     for (auto &param : method.get_function_params ())
-      {
-	param.get_pattern ()->accept_vis (*this);
-	param.get_type ()->accept_vis (*this);
-      }
+      visit_function_param (param);
 
     method.get_definition ()->accept_vis (*this);
   };
