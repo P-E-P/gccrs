@@ -534,6 +534,7 @@ public:
   {
     return !has_generic_args () && get_ident_segment ().is_crate_segment ();
   }
+
   bool is_lower_self_seg () const
   {
     return !has_generic_args () && get_ident_segment ().is_lower_self ();
@@ -645,6 +646,12 @@ public:
   }
 
   NodeId get_pattern_node_id () const override final { return get_node_id (); }
+
+  PathExprSegment &get_final_segment () { return get_segments ().back (); }
+  const PathExprSegment &get_final_segment () const
+  {
+    return get_segments ().back ();
+  }
 
 protected:
   /* Use covariance to implement clone function as returning this object
