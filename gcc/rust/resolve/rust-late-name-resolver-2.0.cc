@@ -100,9 +100,9 @@ Late::visit (AST::PathInExpression &expr)
   // in a function item` error here?
   // do we emit it in `get<Namespace::Labels>`?
 
-  auto label = ctx.labels.resolve_path (expr);
+  auto label = ctx.labels.resolve_path (expr.get_segments ());
 
-  auto value = ctx.values.resolve_path (expr);
+  auto value = ctx.values.resolve_path (expr.get_segments ());
 
   rust_debug ("[ARTHUR] label: %d", label ? *label : -1);
   rust_debug ("[ARTHUR] value: %d", value ? *value : -1);
