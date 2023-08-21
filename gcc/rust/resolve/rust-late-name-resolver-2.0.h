@@ -19,17 +19,34 @@
 #ifndef RUST_LATE_NAME_RESOLVER_2_0_H
 #define RUST_LATE_NAME_RESOLVER_2_0_H
 
-#include "rust-ast.h"
+#include "rust-ast-full.h"
+#include "rust-default-resolver.h"
 
 namespace Rust {
 namespace Resolver2_0 {
 
-class Late
+class Late : public DefaultResolver
 {
+  using DefaultResolver::visit;
+
 public:
-  Late ();
+  Late (NameResolutionContext &ctx);
 
   void go (AST::Crate &crate);
+
+  void new_label (Identifier name, NodeId id);
+
+  void visit_function_param (AST::FunctionParam &) override;
+
+  // some more label declarations
+  void visit (AST::LetStmt &) override;
+  // TODO: Do we need this?
+  // void visit (AST::Method &) override;
+  void visit (AST::IdentifierPattern &) override;
+
+  // resolutions
+  void visit (AST::IdentifierExpr &) override;
+  void visit (AST::PathInExpression &) override;
 
 private:
 };
