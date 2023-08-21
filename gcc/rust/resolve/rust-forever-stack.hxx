@@ -208,15 +208,8 @@ ForeverStack<N>::update_cursor (Node &new_cursor)
 }
 
 template <Namespace N>
-tl::optional<NodeId>
-ForeverStack<N>::get (const Identifier &name)
-{
-  return tl::nullopt;
-}
-
-template <>
 inline tl::optional<NodeId>
-ForeverStack<Namespace::Macros>::get (const Identifier &name)
+ForeverStack<N>::get (const Identifier &name)
 {
   tl::optional<NodeId> resolved_node = tl::nullopt;
 
@@ -226,9 +219,9 @@ ForeverStack<Namespace::Macros>::get (const Identifier &name)
 
     return candidate.map_or (
       [&resolved_node] (NodeId found) {
-	// macro resolving does not need to care about various ribs - they are
-	// available from all contexts if defined in the current scope, or an
-	// outermore one. so if we do have a candidate, we can return it
+	// for most namespaces, we do not need to care about various ribs - they
+	// are available from all contexts if defined in the current scope, or
+	// an outermore one. so if we do have a candidate, we can return it
 	// directly and stop iterating
 	resolved_node = found;
 
@@ -278,9 +271,9 @@ ForeverStack<N>::find_closest_module (Node &starting_point)
 
 /* If a the given condition is met, emit an error about misused leading path
  * segments */
+template <typename S>
 static inline bool
-check_leading_kw_at_start (const AST::SimplePathSegment &segment,
-			   bool condition)
+check_leading_kw_at_start (const S &segment, bool condition)
 {
   if (condition)
     rust_error_at (
@@ -297,9 +290,10 @@ check_leading_kw_at_start (const AST::SimplePathSegment &segment,
 // `super` segment, we go back to the cursor's parent until we reach the
 // correct one or the root.
 template <Namespace N>
-tl::optional<std::vector<AST::SimplePathSegment>::const_iterator>
-ForeverStack<N>::find_starting_point (
-  const std::vector<AST::SimplePathSegment> &segments, Node &starting_point)
+template <typename S>
+tl::optional<typename std::vector<S>::const_iterator>
+ForeverStack<N>::find_starting_point (const std::vector<S> &segments,
+				      Node &starting_point)
 {
   auto iterator = segments.begin ();
 
@@ -313,7 +307,8 @@ ForeverStack<N>::find_starting_point (
   for (; !is_last (iterator, segments); iterator++)
     {
       auto seg = *iterator;
-      auto is_self_or_crate = seg.is_crate_path_seg () || seg.is_lower_self ();
+      auto is_self_or_crate
+	= seg.is_crate_path_seg () || seg.is_lower_self_seg ();
 
       // if we're after the first path segment and meet `self` or `crate`, it's
       // an error - we should only be seeing `super` keywords at this point
@@ -327,7 +322,7 @@ ForeverStack<N>::find_starting_point (
 	  iterator++;
 	  break;
 	}
-      if (seg.is_lower_self ())
+      if (seg.is_lower_self_seg ())
 	{
 	  // do nothing and exit
 	  iterator++;
@@ -356,10 +351,11 @@ ForeverStack<N>::find_starting_point (
 }
 
 template <Namespace N>
+template <typename S>
 tl::optional<typename ForeverStack<N>::Node &>
 ForeverStack<N>::resolve_segments (
-  Node &starting_point, const std::vector<AST::SimplePathSegment> &segments,
-  std::vector<AST::SimplePathSegment>::const_iterator iterator)
+  Node &starting_point, const std::vector<S> &segments,
+  typename std::vector<S>::const_iterator iterator)
 {
   auto *current_node = &starting_point;
   for (; !is_last (iterator, segments); iterator++)
@@ -371,7 +367,7 @@ ForeverStack<N>::resolve_segments (
       // check that we don't encounter *any* leading keywords afterwards
       if (check_leading_kw_at_start (seg, seg.is_crate_path_seg ()
 					    || seg.is_super_path_seg ()
-					    || seg.is_lower_self ()))
+					    || seg.is_lower_self_seg ()))
 	return tl::nullopt;
 
       tl::optional<typename ForeverStack<N>::Node &> child = tl::nullopt;
@@ -406,9 +402,14 @@ ForeverStack<N>::resolve_segments (
 }
 
 template <Namespace N>
+template <typename P>
 tl::optional<NodeId>
-ForeverStack<N>::resolve_path (const AST::SimplePath &path)
+ForeverStack<N>::resolve_path (const P &path)
 {
+  // if there's only one segment, we just use `get`
+  if (path.get_segments ().size () == 1)
+    return get (path.get_final_segment ().as_string ());
+
   auto starting_point = cursor ();
   auto &segments = path.get_segments ();
 
