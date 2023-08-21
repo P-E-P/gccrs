@@ -131,7 +131,7 @@ Early::visit (AST::MacroInvocation &invoc)
   // we won't have changed `definition` from `nullopt` if there are more
   // than one segments in our path
   if (!definition.has_value ())
-    definition = ctx.macros.resolve_path (path);
+    definition = ctx.macros.resolve_path (path.get_segments ());
 
   // if the definition still does not have a value, then it's an error
   if (!definition.has_value ())
