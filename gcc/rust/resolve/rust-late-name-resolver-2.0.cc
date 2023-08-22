@@ -49,7 +49,20 @@ Late::setup_builtin_types ()
     {"usize", new TyTy::USizeType (next_id ())},
     {"isize", new TyTy::ISizeType (next_id ())},
     // missing char, str, never, ()
+    // does name resolution play a part for this? or is it all at typechecking?
+    // yeah it seems to be name resolution as well, which makes sense
   };
+
+  for (const auto &builtin : builtins)
+    {
+      // we should be able to use `insert_at_root` or `insert` here, since we're
+      // at the root :) hopefully!
+      auto ok
+	= ctx.types.insert (builtin.first, builtin.second->get_ref ()
+			    /* FIXME: Invalid! This returns an *HirId* */);
+
+      rust_assert (ok);
+    }
 }
 
 void
