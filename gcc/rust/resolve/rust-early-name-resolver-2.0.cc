@@ -29,6 +29,7 @@ Early::Early (NameResolutionContext &ctx) : DefaultResolver (ctx) {}
 void
 Early::insert_once (AST::MacroInvocation &invocation, NodeId resolved)
 {
+  // TODO: Should we use `ctx.mark_resolved()`?
   AST::MacroRulesDefinition *definition;
   auto ok = ctx.mappings.lookup_macro_def (resolved, &definition);
 
@@ -44,6 +45,7 @@ Early::insert_once (AST::MacroInvocation &invocation, NodeId resolved)
 void
 Early::insert_once (AST::MacroRulesDefinition &def)
 {
+  // TODO: Should we use `ctx.mark_resolved()`?
   AST::MacroRulesDefinition *definition;
   auto exists = ctx.mappings.lookup_macro_def (def.get_node_id (), &definition);
 
