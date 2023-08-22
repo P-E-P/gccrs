@@ -16,9 +16,12 @@
 // along with GCC; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
+#include "optional.h"
 #include "rust-ast-full.h"
 #include "rust-late-name-resolver-2.0.h"
 #include "rust-default-resolver.h"
+#include "rust-tyty.h"
+#include "rust-hir-type-check.h"
 
 namespace Rust {
 namespace Resolver2_0 {
@@ -26,8 +29,34 @@ namespace Resolver2_0 {
 Late::Late (NameResolutionContext &ctx) : DefaultResolver (ctx) {}
 
 void
+Late::setup_builtin_types ()
+{
+  auto next_id = [this] () { return ctx.mappings.get_next_hir_id (); };
+
+  static const std::pair<std::string, TyTy::BaseType *> builtins[] = {
+    {"u8", new TyTy::UintType (next_id (), TyTy::UintType::U8)},
+    {"u16", new TyTy::UintType (next_id (), TyTy::UintType::U16)},
+    {"u32", new TyTy::UintType (next_id (), TyTy::UintType::U32)},
+    {"u64", new TyTy::UintType (next_id (), TyTy::UintType::U64)},
+    {"u128", new TyTy::UintType (next_id (), TyTy::UintType::U128)},
+    {"i8", new TyTy::IntType (next_id (), TyTy::IntType::I8)},
+    {"i16", new TyTy::IntType (next_id (), TyTy::IntType::I16)},
+    {"i32", new TyTy::IntType (next_id (), TyTy::IntType::I32)},
+    {"i64", new TyTy::IntType (next_id (), TyTy::IntType::I64)},
+    {"i128", new TyTy::IntType (next_id (), TyTy::IntType::I128)},
+    {"f32", new TyTy::FloatType (next_id (), TyTy::FloatType::F32)},
+    {"f64", new TyTy::FloatType (next_id (), TyTy::FloatType::F64)},
+    {"usize", new TyTy::USizeType (next_id ())},
+    {"isize", new TyTy::ISizeType (next_id ())},
+    // missing char, str, never, ()
+  };
+}
+
+void
 Late::go (AST::Crate &crate)
 {
+  setup_builtin_types ();
+
   for (auto &item : crate.items)
     item->accept_vis (*this);
 }
