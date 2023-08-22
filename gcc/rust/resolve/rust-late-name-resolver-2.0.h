@@ -47,6 +47,7 @@ public:
   // resolutions
   void visit (AST::IdentifierExpr &) override;
   void visit (AST::PathInExpression &) override;
+  void visit (AST::TypePath &) override;
 
 private:
   /* Setup Rust's builtin types (u8, i32, !...) in the resolver */
