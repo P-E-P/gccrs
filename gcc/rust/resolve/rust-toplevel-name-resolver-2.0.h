@@ -77,6 +77,14 @@ private:
   void visit (AST::Union &union_item) override;
   void visit (AST::ConstantItem &const_item) override;
   void visit (AST::ExternCrate &crate) override;
+
+  // FIXME: Documentation
+  // Call this on all the paths of a UseDec - so each flattened path in a
+  // UseTreeList for example
+  // FIXME: Should that return `found`?
+  bool handle_use_dec (AST::SimplePath path);
+
+  void visit (AST::UseDeclaration &use) override;
   void visit (AST::UseTreeRebind &use) override;
   void visit (AST::UseTreeList &use) override;
   void visit (AST::UseTreeGlob &use) override;
