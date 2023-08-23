@@ -85,9 +85,6 @@ private:
   bool handle_use_dec (AST::SimplePath path);
 
   void visit (AST::UseDeclaration &use) override;
-  void visit (AST::UseTreeRebind &use) override;
-  void visit (AST::UseTreeList &use) override;
-  void visit (AST::UseTreeGlob &use) override;
 };
 
 } // namespace Resolver2_0

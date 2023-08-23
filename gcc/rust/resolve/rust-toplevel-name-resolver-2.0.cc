@@ -325,6 +325,11 @@ TopLevel::visit (AST::ConstantItem &const_item)
 bool
 TopLevel::handle_use_dec (AST::SimplePath path)
 {
+  // TODO: Glob imports can get shadowed by regular imports and regular items.
+  // So we need to store them in a specific way in the ForeverStack - which can
+  // also probably be used by labels and macros etc. Like store it as a
+  // `Shadowable(NodeId)` instead of just a `NodeId`
+
   auto locus = path.get_final_segment ().get_locus ();
   auto declared_name = path.get_final_segment ().as_string ();
 
@@ -489,62 +494,6 @@ TopLevel::visit (AST::UseDeclaration &use)
 		     "could not resolve import %qs",
 		     path.as_string ().c_str ());
 }
-
-void
-TopLevel::visit (AST::UseTreeRebind &use)
-{
-  // const auto &path = use.get_path ();
-  // auto new_name = std::string ();
-
-  // switch (use.get_new_bind_type ())
-  //   {
-  //   case AST::UseTreeRebind::NONE:
-  //     new_name = use.get_path ().get_final_segment ().as_string ();
-  //     break;
-  //   case AST::UseTreeRebind::IDENTIFIER:
-  //     new_name = use.get_identifier ().as_string ();
-  //     break;
-  //   case AST::UseTreeRebind::WILDCARD:
-  //     // FIXME: What do we do here?
-  //     // What is WILDCARD? Glob use?
-  //     rust_unreachable ();
-  //     break;
-  //   }
-
-  // handle_use_dec (new_name, path, use.get_locus ());
-  // if (!found) // or will that have been reported already?
-  //   rust_error_at (use.get_locus (), "unresolved import");
-}
-
-void
-TopLevel::visit (AST::UseTreeList &use)
-{
-  //  auto paths = std::vector<AST::SimplePath> ();
-  //  auto prefix = AST::SimplePath::create_empty ();
-
-  //  if (use.has_path ())
-  //    prefix = use.get_path ();
-
-  //  for (const auto &tree : use.get_trees ())
-  //    {
-  //      auto sub_paths = std::vector<AST::SimplePath> ();
-  //      flatten (tree.get (), sub_paths);
-
-  //      for (auto &sub_path : sub_paths)
-  // {
-  //   auto new_path = prefix;
-  //   std::copy (sub_path.get_segments ().begin (),
-  // 	     sub_path.get_segments ().end (),
-  // 	     std::back_inserter (new_path.get_segments ()));
-
-  //   paths.emplace_back (new_path);
-  // }
-  //    }
-}
-
-void
-TopLevel::visit (AST::UseTreeGlob &use)
-{}
 
 } // namespace Resolver2_0
 } // namespace Rust
