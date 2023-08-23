@@ -554,8 +554,10 @@ DefaultResolver::visit (AST::UseTreeRebind &)
 {}
 
 void
-DefaultResolver::visit (AST::UseDeclaration &)
-{}
+DefaultResolver::visit (AST::UseDeclaration &use)
+{
+  use.get_tree ()->accept_vis (*this);
+}
 
 void
 DefaultResolver::visit (AST::TypeAlias &)
