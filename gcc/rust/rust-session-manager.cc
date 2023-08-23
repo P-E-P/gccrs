@@ -67,6 +67,10 @@ const char *kASTDumpFile = "gccrs.ast.dump";
 const char *kASTPrettyDumpFile = "gccrs.ast-pretty.dump";
 const char *kASTPrettyDumpFileExpanded = "gccrs.ast-pretty-expanded.dump";
 const char *kASTExpandedDumpFile = "gccrs.ast-expanded.dump";
+const char *kASTmacroResolutionDumpFile = "gccrs.ast-macro-resolution.dump";
+const char *kASTlabelResolutionDumpFile = "gccrs.ast-label-resolution.dump";
+const char *kASTtypeResolutionDumpFile = "gccrs.ast-type-resolution.dump";
+const char *kASTvalueResolutionDumpFile = "gccrs.ast-value-resolution.dump";
 const char *kHIRDumpFile = "gccrs.hir.dump";
 const char *kHIRPrettyDumpFile = "gccrs.hir-pretty.dump";
 const char *kHIRTypeResolutionDumpFile = "gccrs.type-resolution.dump";
@@ -84,6 +88,7 @@ Session::get_instance ()
 
 static std::string
 infer_crate_name (const std::string &filename)
+
 {
   if (filename == "-")
     return kDefaultCrateName;
@@ -613,6 +618,13 @@ Session::compile_crate (const char *filename)
 
   if (options.dump_option_enabled (CompileOptions::RESOLUTION_DUMP))
     {
+      dump_name_resolution (name_resolution_ctx);
+
+      name_resolution_ctx.macros.as_debug_string ();
+      name_resolution_ctx.values.as_debug_string ();
+      name_resolution_ctx.types.as_debug_string ();
+      name_resolution_ctx.labels.as_debug_string ();
+
       // TODO: what do I dump here? resolved names? AST with resolved names?
     }
 
@@ -950,6 +962,23 @@ Session::dump_ast_pretty (AST::Crate &crate, bool expanded) const
   AST::Dump (out).go (crate);
 
   out.close ();
+}
+
+void
+Session::dump_name_resolution (Resolver2_0::NameResolutionContext &ctx) const
+{
+  std::array<std::pair<std::string, std::ofstream>, 4> content_and_streams = {{
+    {ctx.types.as_debug_string (), std::ofstream (kASTtypeResolutionDumpFile)},
+    {ctx.macros.as_debug_string (),
+     std::ofstream (kASTmacroResolutionDumpFile)},
+    {ctx.labels.as_debug_string (),
+     std::ofstream (kASTlabelResolutionDumpFile)},
+    {ctx.values.as_debug_string (),
+     std::ofstream (kASTvalueResolutionDumpFile)},
+  }};
+
+  for (auto &to_dump : content_and_streams)
+    to_dump.second << to_dump.first;
 }
 
 void
