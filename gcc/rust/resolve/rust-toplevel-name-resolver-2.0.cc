@@ -17,6 +17,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "rust-toplevel-name-resolver-2.0.h"
+#include "optional.h"
 #include "rust-ast-full.h"
 #include "rust-hir-map.h"
 #include "rust-attribute-values.h"
@@ -33,11 +34,16 @@ void
 TopLevel::insert_or_error_out (const Identifier &identifier, const T &node,
 			       Namespace ns)
 {
-  auto loc = node.get_locus ();
-  auto node_id = node.get_node_id ();
+  insert_or_error_out (identifier, node.get_locus (), node.get_node_id (), ns);
+}
 
+void
+TopLevel::insert_or_error_out (const Identifier &identifier,
+			       const location_t &locus, const NodeId &node_id,
+			       Namespace ns)
+{
   // keep track of each node's location to provide useful errors
-  node_locations.emplace (node_id, loc);
+  node_locations.emplace (node_id, locus);
 
   auto result = ctx.insert (identifier, node_id, ns);
 
@@ -46,7 +52,7 @@ TopLevel::insert_or_error_out (const Identifier &identifier, const T &node,
       // can we do something like check if the node id is the same? if it is the
       // same, it's not an error, just the resolver running multiple times?
 
-      rich_location rich_loc (line_table, loc);
+      rich_location rich_loc (line_table, locus);
       rich_loc.add_range (node_locations[result.error ().existing]);
 
       rust_error_at (rich_loc, ErrorCode::E0428, "%qs defined multiple times",
@@ -315,6 +321,92 @@ TopLevel::visit (AST::ConstantItem &const_item)
 
   ctx.scoped (Rib::Kind::ConstantItem, const_item.get_node_id (), expr_vis);
 }
+
+void
+TopLevel::visit (AST::UseTreeRebind &use)
+{
+  const auto &path = use.get_path ();
+  auto new_name = std::string ();
+
+  switch (use.get_new_bind_type ())
+    {
+    case AST::UseTreeRebind::NONE:
+      new_name = use.get_path ().get_final_segment ().as_string ();
+      break;
+    case AST::UseTreeRebind::IDENTIFIER:
+      new_name = use.get_identifier ().as_string ();
+      break;
+    case AST::UseTreeRebind::WILDCARD:
+      // FIXME: What do we do here?
+      // What is WILDCARD? Glob use?
+      rust_unreachable ();
+      break;
+    }
+
+  // in what namespace do we perform path resolution? All of them? see which one
+  // matches? Error out on ambiguities?
+  // so, apparently, for each one that matches, add it to the proper namespace
+  // :(
+
+  auto found = false;
+
+  auto resolve_and_insert = [this, &found, &new_name,
+			     &use] (Namespace ns, const AST::SimplePath &path) {
+    tl::optional<NodeId> resolved = tl::nullopt;
+
+    // FIXME: resolve_path needs to return an `expected<NodeId, Error>` so that
+    // we can improve it with hints or location or w/ever. and maybe only emit
+    // it the first time.
+    switch (ns)
+      {
+      case Namespace::Values:
+	resolved = ctx.values.resolve_path (path.get_segments ());
+	break;
+      case Namespace::Types:
+	resolved = ctx.types.resolve_path (path.get_segments ());
+	break;
+      case Namespace::Macros:
+	resolved = ctx.macros.resolve_path (path.get_segments ());
+	break;
+      case Namespace::Labels:
+	// TODO: Is that okay?
+	rust_unreachable ();
+      }
+
+    // FIXME: Ugly
+    (void) resolved.map ([this, &found, &new_name, &use] (NodeId id) {
+      found = true;
+
+      // what do we do with the id?
+      insert_or_error_out (new_name, use.get_locus (), id, Namespace::Macros);
+
+      return id;
+    });
+  };
+
+  // do this for all namespaces (even Labels?)
+
+  resolve_and_insert (Namespace::Values, path);
+  resolve_and_insert (Namespace::Types, path);
+  resolve_and_insert (Namespace::Macros, path);
+
+  // if (!found) // or will that have been reported already?
+  //   rust_error_at (use.get_locus (), "unresolved import");
+
+  // TODO: No labels?
+
+  rust_debug ("[ARTHUR]: Rebind");
+} // namespace Resolver2_0
+
+void
+TopLevel::visit (AST::UseTreeList &use)
+{
+  rust_debug ("[ARTHUR]: List");
+}
+
+void
+TopLevel::visit (AST::UseTreeGlob &use)
+{}
 
 } // namespace Resolver2_0
 } // namespace Rust
