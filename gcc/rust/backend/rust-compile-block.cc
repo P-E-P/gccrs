@@ -44,15 +44,43 @@ CompileBlock::visit (HIR::BlockExpr &expr)
   location_t end_location = expr.get_end_locus ();
   auto body_mappings = expr.get_mappings ();
 
-  Resolver::Rib *rib = nullptr;
-  if (!ctx->get_resolver ()->find_name_rib (body_mappings.get_nodeid (), &rib))
+  rust_warning_at (expr.get_locus (), 0,
+		   "Arthur did not clean up his stupid code %s:%d", __FILE__,
+		   __LINE__);
+  auto local_ids = std::vector<NodeId> ();
+
+  if (flag_name_resolution_2_0)
     {
-      rust_fatal_error (expr.get_locus (), "failed to setup locals per block");
-      return;
+      auto nr_ctx
+	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
+
+      auto candidate = nr_ctx.values.to_rib (body_mappings.get_nodeid ());
+
+      // FIXME: Ugly
+      candidate.map_or_else (
+	[&local_ids] (Resolver2_0::Rib &rib) {
+	  for (auto local : rib.get_values ())
+	    local_ids.emplace_back (local.second);
+	},
+	[] () { rust_unreachable (); });
+    }
+  else
+    {
+      Resolver::Rib *rib = nullptr;
+      if (!ctx->get_resolver ()->find_name_rib (body_mappings.get_nodeid (),
+						&rib))
+	{
+	  rust_fatal_error (expr.get_locus (),
+			    "failed to setup locals per block");
+	  return;
+	}
+
+      for (auto it : rib->get_declarations ())
+	local_ids.emplace_back (it.first);
     }
 
   std::vector<Bvariable *> locals
-    = compile_locals_for_block (ctx, *rib, fndecl);
+    = compile_locals_for_block (ctx, local_ids, fndecl);
 
   tree enclosing_scope = ctx->peek_enclosing_scope ();
   tree new_block = Backend::block (fndecl, enclosing_scope, locals,

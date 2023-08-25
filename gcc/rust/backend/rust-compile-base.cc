@@ -31,6 +31,7 @@
 #include "rust-type-util.h"
 #include "rust-compile-implitem.h"
 #include "rust-attribute-values.h"
+#include "rust-immutable-name-resolution-context.h"
 
 #include "fold-const.h"
 #include "stringpool.h"
@@ -452,13 +453,13 @@ HIRCompileBase::indirect_expression (tree expr, location_t locus)
 }
 
 std::vector<Bvariable *>
-HIRCompileBase::compile_locals_for_block (Context *ctx, Resolver::Rib &rib,
+HIRCompileBase::compile_locals_for_block (Context *ctx,
+					  const std::vector<NodeId> &local_ids,
 					  tree fndecl)
 {
   std::vector<Bvariable *> locals;
-  for (auto it : rib.get_declarations ())
+  for (auto node_id : local_ids)
     {
-      NodeId node_id = it.first;
       HirId ref = UNKNOWN_HIRID;
       if (!ctx->get_mappings ()->lookup_node_to_hir (node_id, &ref))
 	continue;
@@ -624,13 +625,41 @@ HIRCompileBase::compile_function (
 
   // lookup locals
   auto body_mappings = function_body->get_mappings ();
-  Resolver::Rib *rib = nullptr;
-  bool ok
-    = ctx->get_resolver ()->find_name_rib (body_mappings.get_nodeid (), &rib);
-  rust_assert (ok);
+
+  rust_warning_at (function_body->get_locus (), 0,
+		   "Arthur did not clean up his stupid code %s:%d", __FILE__,
+		   __LINE__);
+  auto local_ids = std::vector<NodeId> ();
+
+  if (flag_name_resolution_2_0)
+    {
+      auto nr_ctx
+	= Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
+
+      auto candidate = nr_ctx.values.to_rib (body_mappings.get_nodeid ());
+
+      // FIXME: Ugly
+      candidate.map_or_else (
+	[&local_ids] (Resolver2_0::Rib &rib) {
+	  for (auto local : rib.get_values ())
+	    local_ids.emplace_back (local.second);
+	},
+	[] () { rust_unreachable (); });
+    }
+  else
+    {
+      Resolver::Rib *rib = nullptr;
+      bool ok
+	= ctx->get_resolver ()->find_name_rib (body_mappings.get_nodeid (),
+					       &rib);
+      rust_assert (ok);
+
+      for (auto it : rib->get_declarations ())
+	local_ids.emplace_back (it.first);
+    }
 
   std::vector<Bvariable *> locals
-    = compile_locals_for_block (ctx, *rib, fndecl);
+    = compile_locals_for_block (ctx, local_ids, fndecl);
 
   tree enclosing_scope = NULL_TREE;
   location_t start_location = function_body->get_locus ();
@@ -703,12 +732,39 @@ HIRCompileBase::compile_constant_item (
       start_location = function_body->get_locus ();
       end_location = function_body->get_end_locus ();
 
-      Resolver::Rib *rib = nullptr;
-      bool ok = ctx->get_resolver ()->find_name_rib (
-	function_body->get_mappings ().get_nodeid (), &rib);
-      rust_assert (ok);
+      rust_warning_at (function_body->get_locus (), 0,
+		       "Arthur did not clean up his stupid code %s:%d",
+		       __FILE__, __LINE__);
+      auto local_ids = std::vector<NodeId> ();
 
-      locals = compile_locals_for_block (ctx, *rib, fndecl);
+      if (flag_name_resolution_2_0)
+	{
+	  auto nr_ctx
+	    = Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
+
+	  auto candidate = nr_ctx.values.to_rib (
+	    function_body->get_mappings ().get_nodeid ());
+
+	  // FIXME: Ugly
+	  candidate.map_or_else (
+	    [&local_ids] (Resolver2_0::Rib &rib) {
+	      for (auto local : rib.get_values ())
+		local_ids.emplace_back (local.second);
+	    },
+	    [] () { rust_unreachable (); });
+	}
+      else
+	{
+	  Resolver::Rib *rib = nullptr;
+	  bool ok = ctx->get_resolver ()->find_name_rib (
+	    function_body->get_mappings ().get_nodeid (), &rib);
+	  rust_assert (ok);
+
+	  for (auto it : rib->get_declarations ())
+	    local_ids.emplace_back (it.first);
+	}
+
+      locals = compile_locals_for_block (ctx, local_ids, fndecl);
     }
 
   tree code_block = Backend::block (fndecl, enclosing_scope, locals,

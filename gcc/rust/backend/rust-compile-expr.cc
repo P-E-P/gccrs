@@ -2730,13 +2730,40 @@ CompileExpr::generate_closure_function (HIR::ClosureExpr &expr,
   if (is_block_expr)
     {
       auto body_mappings = function_body->get_mappings ();
-      Resolver::Rib *rib = nullptr;
-      bool ok
-	= ctx->get_resolver ()->find_name_rib (body_mappings.get_nodeid (),
-					       &rib);
-      rust_assert (ok);
 
-      locals = compile_locals_for_block (ctx, *rib, fndecl);
+      rust_warning_at (function_body->get_locus (), 0,
+		       "Arthur did not clean up his stupid code %s:%d",
+		       __FILE__, __LINE__);
+      auto local_ids = std::vector<NodeId> ();
+
+      if (flag_name_resolution_2_0)
+	{
+	  auto nr_ctx
+	    = Resolver2_0::ImmutableNameResolutionContext::get ().resolver ();
+
+	  auto candidate = nr_ctx.values.to_rib (body_mappings.get_nodeid ());
+
+	  // FIXME: Ugly
+	  candidate.map_or_else (
+	    [&local_ids] (Resolver2_0::Rib &rib) {
+	      for (auto local : rib.get_values ())
+		local_ids.emplace_back (local.second);
+	    },
+	    [] () { rust_unreachable (); });
+	}
+      else
+	{
+	  Resolver::Rib *rib = nullptr;
+	  bool ok
+	    = ctx->get_resolver ()->find_name_rib (body_mappings.get_nodeid (),
+						   &rib);
+	  rust_assert (ok);
+
+	  for (auto it : rib->get_declarations ())
+	    local_ids.emplace_back (it.first);
+	}
+
+      locals = compile_locals_for_block (ctx, local_ids, fndecl);
     }
 
   tree enclosing_scope = NULL_TREE;
