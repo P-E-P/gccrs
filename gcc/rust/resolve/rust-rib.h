@@ -103,6 +103,16 @@ struct DuplicateNameError
 class Rib
 {
 public:
+  class Definition
+  {
+  public:
+    explicit Definition (NodeId id, bool shadowable = false);
+
+  private:
+    NodeId id;
+    bool shadowable;
+  };
+
   enum class Kind
   {
     Normal,
@@ -152,6 +162,7 @@ public:
   const std::unordered_map<std::string, NodeId> &get_values () const;
 
 private:
+  // TODO: Switch this to (NodeId, shadowable = false);
   std::unordered_map<std::string, NodeId> values;
 };
 
