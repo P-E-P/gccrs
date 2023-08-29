@@ -65,6 +65,8 @@ DefaultResolver::visit (AST::Function &function)
     for (auto &param : function.get_function_params ())
       visit_function_param (param);
 
+    // TODO: Don't we need to visit the return type here as well?
+
     function.get_definition ()->accept_vis (*this);
   };
 
@@ -620,8 +622,18 @@ DefaultResolver::visit (AST::ExternalStaticItem &)
 {}
 
 void
-DefaultResolver::visit (AST::ExternalFunctionItem &)
-{}
+DefaultResolver::visit (AST::ExternalFunctionItem &function)
+{
+  auto def_fn = [this, &function] () {
+    for (auto &param : function.get_function_params ())
+      {
+	// TODO: So extern function params are not patterns?
+	param.get_type ()->accept_vis (*this);
+      }
+  };
+
+  ctx.scoped (Rib::Kind::Function, function.get_node_id (), def_fn);
+}
 
 void
 DefaultResolver::visit (AST::MacroMatchFragment &)
