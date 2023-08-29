@@ -2747,7 +2747,7 @@ CompileExpr::generate_closure_function (HIR::ClosureExpr &expr,
 	  candidate.map_or_else (
 	    [&local_ids] (Resolver2_0::Rib &rib) {
 	      for (auto local : rib.get_values ())
-		local_ids.emplace_back (local.second);
+		local_ids.emplace_back (local.second.id);
 	    },
 	    [] () { rust_unreachable (); });
 	}
