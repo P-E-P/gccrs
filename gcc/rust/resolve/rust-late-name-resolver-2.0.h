@@ -36,8 +36,6 @@ public:
 
   void new_label (Identifier name, NodeId id);
 
-  void visit_function_param (AST::FunctionParam &) override;
-
   // some more label declarations
   void visit (AST::LetStmt &) override;
   // TODO: Do we need this?
