@@ -204,7 +204,8 @@ Early::visit_attributes (std::vector<AST::Attribute> &attrs)
 	  auto traits = attr.get_traits_to_derive ();
 	  for (auto &trait : traits)
 	    {
-	      auto definition = ctx.macros.resolve_path (trait.get ());
+	      auto definition
+		= ctx.macros.resolve_path (trait.get ().get_segments ());
 	      if (!definition.has_value ())
 		{
 		  // FIXME: Change to proper error message
@@ -226,7 +227,8 @@ Early::visit_attributes (std::vector<AST::Attribute> &attrs)
 		 ->lookup_builtin (name)
 		 .is_error ()) // Do not resolve builtins
 	{
-	  auto definition = ctx.macros.resolve_path (attr.get_path ());
+	  auto definition
+	    = ctx.macros.resolve_path (attr.get_path ().get_segments ());
 	  if (!definition.has_value ())
 	    {
 	      // FIXME: Change to proper error message

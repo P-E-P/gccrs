@@ -50,6 +50,8 @@ public:
   void visit (AST::Module &) override;
 
   void visit (AST::MacroInvocation &) override;
+  void visit (AST::Function &) override;
+  void visit (AST::StructStruct &) override;
 
 private:
   void visit_attributes (std::vector<AST::Attribute> &attrs);
