@@ -586,7 +586,7 @@ MAKEFLAGS=
 
 # Identity of this package.
 PACKAGE_NAME='libgrust'
-PACKAGE_TARNAME='librust'
+PACKAGE_TARNAME='libgrust'
 PACKAGE_VERSION='version-unused'
 PACKAGE_STRING='libgrust version-unused'
 PACKAGE_BUGREPORT=''
@@ -1390,7 +1390,7 @@ Fine tuning of the installation directories:
   --infodir=DIR           info documentation [DATAROOTDIR/info]
   --localedir=DIR         locale-dependent data [DATAROOTDIR/locale]
   --mandir=DIR            man documentation [DATAROOTDIR/man]
-  --docdir=DIR            documentation root [DATAROOTDIR/doc/librust]
+  --docdir=DIR            documentation root [DATAROOTDIR/doc/libgrust]
   --htmldir=DIR           html documentation [DOCDIR]
   --dvidir=DIR            dvi documentation [DOCDIR]
   --pdfdir=DIR            pdf documentation [DOCDIR]
@@ -3033,7 +3033,7 @@ fi
 
 
 # Define the identity of the package.
- PACKAGE='librust'
+ PACKAGE='libgrust'
  VERSION='version-unused'
 
 
@@ -16054,8 +16054,8 @@ ac_config_files="$ac_config_files libproc_macro/Makefile"
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: librust has been configured." >&5
-$as_echo "$as_me: librust has been configured." >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: libgrust has been configured." >&5
+$as_echo "$as_me: libgrust has been configured." >&6;}
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

@@ -1,4 +1,4 @@
-AC_INIT([libgrust], version-unused,,librust)
+AC_INIT([libgrust], version-unused,,libgrust)
 AC_CONFIG_SRCDIR(Makefile.am)
 AC_CONFIG_FILES([Makefile])
 
@@ -108,6 +108,6 @@ _EOF
 ])
 
 
-AC_MSG_NOTICE([librust has been configured.])
+AC_MSG_NOTICE([libgrust has been configured.])
 
 AC_OUTPUT

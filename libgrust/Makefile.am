@@ -62,7 +62,7 @@ AM_MAKEFLAGS = \
 	"DESTDIR=$(DESTDIR)" \
 	"WERROR=$(WERROR)" \
         "TARGET_LIB_PATH=$(TARGET_LIB_PATH)" \
-        "TARGET_LIB_PATH_librust=$(TARGET_LIB_PATH_librust)" \
+        "TARGET_LIB_PATH_libgrust=$(TARGET_LIB_PATH_libgrust)" \
 	"LIBTOOL=$(RUST_BUILDDIR)/libtool"
 
 include $(top_srcdir)/../multilib.am
