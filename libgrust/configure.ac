@@ -32,6 +32,9 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(limits.h stddef.h string.h strings.h stdlib.h \
                  time.h sys/stat.h wchar.h)
 
+AC_ARG_ENABLE([werror],
+  [AS_HELP_STRING([--disable-werror], [disable building with -Werror])])
+
 # Check for tools
 AM_PROG_AR
 AC_PROG_CC
