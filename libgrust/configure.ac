@@ -114,6 +114,7 @@ _EOF
    AS_UNSET([ml_norecursion])
 ])
 
+GCC_BASE_VER
 
 AC_MSG_NOTICE([libgrust has been configured.])
 
