@@ -35,6 +35,10 @@ AC_CHECK_HEADERS(limits.h stddef.h string.h strings.h stdlib.h \
 AC_ARG_ENABLE([werror],
   [AS_HELP_STRING([--disable-werror], [disable building with -Werror])])
 
+# Add CET specific flags if CET is enabled
+GCC_CET_FLAGS(CET_FLAGS)
+XCFLAGS="$XCFLAGS $CET_FLAGS"
+
 # Check for tools
 AM_PROG_AR
 AC_PROG_CC
