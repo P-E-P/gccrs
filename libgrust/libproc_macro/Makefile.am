@@ -2,8 +2,8 @@ SUFFIXES = .cc .o .a .lo .la
 
 ACLOCAL_AMFLAGS = -I .. -I ../../config
 
-toolexeclibdir=@toolexeclibdir@
-toolexecdir=@toolexecdir@
+AR=@AR@
+AR_FLAGS = rc
 
 # Work around what appears to be a GNU make bug handling MAKEFLAGS
 # values defined in terms of make variables, as is the case for CC and
@@ -45,14 +45,21 @@ AM_MAKEFLAGS = \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"DESTDIR=$(DESTDIR)" \
 	"WERROR=$(WERROR)" \
-        "TARGET_LIB_PATH=$(TARGET_LIB_PATH)" \
-        "TARGET_LIB_PATH_libgm2=$(TARGET_LIB_PATH_libgm2)"
+        "TARGET_LIB_PATH=$(TARGET_LIB_PATH)"
 
-toolexeclib_LTLIBRARIES = libproc_macro.la
+TARGETLIB = ./libproc_macro.a
 
-libproc_macro_la_SOURCES = \
-	proc_macro.cc
+LIBOBJS = @LIBOBJS@
 
-include_HEADERS = \
-	proc_macro.h
+objext = @OBJEXT@
+
+REQUIRED_OFILES =							\
+	./proc_macro.$(objext)
+
+all: $(TARGETLIB)
+
+$(TARGETLIB): $(REQUIRED_OFILES) $(LIBOBJS)
+	-rm -f $(TARGETLIB)
+	$(AR) $(AR_FLAGS) $(TARGETLIB) \
+	  $(REQUIRED_OFILES) $(EXTRA_OFILES) $(LIBOBJS)
 
