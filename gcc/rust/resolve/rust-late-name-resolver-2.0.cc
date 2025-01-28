@@ -264,7 +264,7 @@ Late::visit (AST::PathInExpression &expr)
     {
       rust_error_at (expr.get_locus (),
 		     "could not resolve path expression: %qs",
-		     expr.as_simple_path ().as_string ().c_str ());
+		     expr.as_string ().c_str ());
       return;
     }
 
