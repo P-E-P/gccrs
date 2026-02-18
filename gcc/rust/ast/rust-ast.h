@@ -565,7 +565,7 @@ protected:
 
 // aka Attr
 // Attribute AST representation
-class Attribute : Visitable
+class Attribute : public Visitable
 {
   SimplePath path;
 
