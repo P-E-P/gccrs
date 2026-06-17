@@ -192,7 +192,11 @@ TopLevel::visit_extern_crate (AST::ExternCrate &extern_crate, AST::Crate &crate,
 	mappings.insert_bang_proc_macro_def (macro);
     }
 
-  visit (crate);
+    // We do *NOT* visit the crate because loaded crates are resolved
+    // independently.
+#if 0
+    visit (crate);
+#endif
 }
 
 static bool
