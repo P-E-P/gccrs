@@ -10812,7 +10812,8 @@ trees_in::tree_node (bool is_use)
 
 	int quals = i ();
 	if (quals >= 0 && !get_overrun ())
-	  res = cp_build_qualified_type (res, quals);
+	  res = cp_build_qualified_type (res,
+					 static_cast<cv_qualifier> (quals));
 
 	int tag = i ();
 	if (!tag)
