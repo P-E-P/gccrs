@@ -1329,6 +1329,7 @@ Session::load_extern_crate (const std::string &crate_name, location_t locus)
   // the function's content because it dumps the AST but what is truly required
   // is the function and item names.
   early.go (parsed_crate);
+  Resolver2_0::Late (ctx).go (parsed_crate);
 
   std::vector<AttributeProcMacro> attribute_macros;
   std::vector<CustomDeriveProcMacro> derive_macros;
