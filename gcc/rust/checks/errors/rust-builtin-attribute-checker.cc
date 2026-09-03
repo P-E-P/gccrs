@@ -17,7 +17,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "rust-builtin-attribute-checker.h"
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-attributes.h"
 #include "rust-attribute-values.h"
 #include "rust-session-manager.h"
@@ -392,13 +392,13 @@ const std::unordered_map<std::string, std::function<void (AST::Attribute &)>>
     {Attrs::RUSTC_CONVERSION_SUGGESTION, handlers::expect_no_input},
 };
 
-tl::optional<std::function<void (AST::Attribute &)>>
+gcc::optional<std::function<void (AST::Attribute &)>>
 lookup_handler (std::string attr_name)
 {
   auto res = attribute_checking_handlers.find (attr_name);
   if (res != attribute_checking_handlers.cend ())
     return res->second;
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 static void

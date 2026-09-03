@@ -246,12 +246,12 @@ public:
 
 private:
   std::vector<PathExprSegment> segments;
-  tl::optional<LangItem::Kind> lang_item;
+  gcc::optional<LangItem::Kind> lang_item;
   Kind kind;
 
 protected:
   PathPattern (std::vector<PathExprSegment> segments)
-    : segments (std::move (segments)), lang_item (tl::nullopt),
+    : segments (std::move (segments)), lang_item (gcc::nullopt),
       kind (Kind::Segmented)
   {}
 
@@ -429,8 +429,8 @@ public:
 
 private:
   Analysis::NodeMapping mappings;
-  tl::optional<PathIdentSegment> ident_segment;
-  tl::optional<LangItem::Kind> lang_item;
+  gcc::optional<PathIdentSegment> ident_segment;
+  gcc::optional<LangItem::Kind> lang_item;
   location_t locus;
 
 protected:

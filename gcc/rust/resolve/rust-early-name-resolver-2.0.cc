@@ -17,7 +17,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "rust-early-name-resolver-2.0.h"
-#include "optional.h"
+#include "stdbackport/optional"
 #include "options.h"
 #include "rust-ast.h"
 #include "rust-diagnostics.h"
@@ -243,7 +243,7 @@ Early::TextualScope::insert (std::string name, NodeId id)
   scopes.back ().insert ({name, id});
 }
 
-tl::optional<NodeId>
+gcc::optional<NodeId>
 Early::TextualScope::get (const std::string &name)
 {
   for (auto iterator = scopes.rbegin (); iterator != scopes.rend (); iterator++)
@@ -254,7 +254,7 @@ Early::TextualScope::get (const std::string &name)
 	return found->second;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 void
@@ -342,8 +342,8 @@ Early::visit (AST::MacroInvocation &invoc)
 
   // https://doc.rust-lang.org/reference/macros-by-example.html#path-based-scope
 
-  tl::optional<NameResolutionContext::NamespacedDefinition> ns_def
-    = tl::nullopt;
+  gcc::optional<NameResolutionContext::NamespacedDefinition> ns_def
+    = gcc::nullopt;
   if (path.get_segments ().size () == 1)
     ns_def = textual_scope.get (path.get_final_segment ().as_string ())
 	       .map ([] (NodeId id) {

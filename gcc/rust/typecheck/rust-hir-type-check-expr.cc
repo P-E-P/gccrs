@@ -16,7 +16,7 @@
 // along with GCC; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-common.h"
 #include "rust-diagnostics.h"
 #include "rust-hir-expr.h"
@@ -1402,12 +1402,12 @@ emit_ambiguous_resolution_error (HIR::MethodCallExpr &expr,
 // error out.
 //
 // FIXME: The first case is not handled at the moment, so we error out
-tl::optional<const MethodCandidate &>
+gcc::optional<const MethodCandidate &>
 handle_multiple_candidates (HIR::MethodCallExpr &expr,
 			    std::set<MethodCandidate> &candidates)
 {
   auto all_default = true;
-  tl::optional<const MethodCandidate &> found = tl::nullopt;
+  gcc::optional<const MethodCandidate &> found = gcc::nullopt;
 
   for (auto &c : candidates)
     {
@@ -1426,7 +1426,7 @@ handle_multiple_candidates (HIR::MethodCallExpr &expr,
 	  else
 	    {
 	      emit_ambiguous_resolution_error (expr, candidates);
-	      return tl::nullopt;
+	      return gcc::nullopt;
 	    }
 	}
     }
@@ -1439,7 +1439,7 @@ handle_multiple_candidates (HIR::MethodCallExpr &expr,
 		     "cannot resolve method calls to non-specialized methods "
 		     "(all function candidates are %qs)",
 		     "default");
-      return tl::nullopt;
+      return gcc::nullopt;
     }
 
   return found;
@@ -1472,7 +1472,7 @@ TypeCheckExpr::visit (HIR::MethodCallExpr &expr)
       return;
     }
 
-  tl::optional<const MethodCandidate &> candidate = *candidates.begin ();
+  gcc::optional<const MethodCandidate &> candidate = *candidates.begin ();
 
   if (candidates.size () > 1)
     candidate = handle_multiple_candidates (expr, candidates);

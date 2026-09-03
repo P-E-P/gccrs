@@ -2202,7 +2202,7 @@ temporary_variable (tree fndecl, tree bind_tree, tree type_tree, tree init_tree,
 // Make a label.
 
 tree
-label (tree func_tree, tl::optional<GGC::Ident> name, location_t location)
+label (tree func_tree, gcc::optional<GGC::Ident> name, location_t location)
 {
   tree decl;
   if (!name.has_value ())
@@ -2257,7 +2257,7 @@ label_address (tree label, location_t location)
 // Declare or define a new function.
 
 tree
-function (tree functype, GGC::Ident name, tl::optional<GGC::Ident> asm_name,
+function (tree functype, GGC::Ident name, gcc::optional<GGC::Ident> asm_name,
 	  unsigned int flags, location_t location)
 {
   if (error_operand_p (functype))
@@ -2314,7 +2314,7 @@ function_defer_statement (tree function, tree undefer_tree, tree defer_tree,
     push_cfun (DECL_STRUCT_FUNCTION (function));
 
   tree stmt_list = NULL;
-  tree label = Backend::label (function, tl::nullopt, location);
+  tree label = Backend::label (function, gcc::nullopt, location);
   tree label_def = label_definition_statement (label);
   append_to_statement_list (label_def, &stmt_list);
 

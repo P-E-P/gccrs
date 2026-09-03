@@ -17,7 +17,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "rust-hir-type-check-item.h"
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-canonical-path.h"
 #include "rust-diagnostics.h"
 #include "rust-hir-item.h"
@@ -350,7 +350,7 @@ TypeCheckItem::visit (HIR::TupleStruct &struct_decl)
     new TyTy::VariantDef (struct_decl.get_mappings ().get_hirid (),
 			  struct_decl.get_mappings ().get_defid (),
 			  struct_decl.get_identifier ().as_string (), ident,
-			  TyTy::VariantDef::VariantType::TUPLE, tl::nullopt,
+			  TyTy::VariantDef::VariantType::TUPLE, gcc::nullopt,
 			  std::move (fields)));
 
   auto *type = new TyTy::ADTType (
@@ -455,7 +455,7 @@ TypeCheckItem::visit (HIR::StructStruct &struct_decl)
     new TyTy::VariantDef (struct_decl.get_mappings ().get_hirid (),
 			  struct_decl.get_mappings ().get_defid (),
 			  struct_decl.get_identifier ().as_string (), ident,
-			  variant_type, tl::nullopt, std::move (fields)));
+			  variant_type, gcc::nullopt, std::move (fields)));
 
   auto *type = new TyTy::ADTType (
     struct_decl.get_mappings ().get_defid (),
@@ -584,7 +584,7 @@ TypeCheckItem::visit (HIR::Union &union_decl)
     new TyTy::VariantDef (union_decl.get_mappings ().get_hirid (),
 			  union_decl.get_mappings ().get_defid (),
 			  union_decl.get_identifier ().as_string (), ident,
-			  TyTy::VariantDef::VariantType::STRUCT, tl::nullopt,
+			  TyTy::VariantDef::VariantType::STRUCT, gcc::nullopt,
 			  std::move (fields)));
 
   auto *type
@@ -1070,8 +1070,7 @@ TypeCheckItem::validate_repr_simd (
 
   switch (ty_kind)
     {
-    case TyTy::TypeKind::INT:
-      {
+      case TyTy::TypeKind::INT: {
 	auto int_ty = static_cast<TyTy::IntType *> (first_field_ty);
 	auto int_kind = int_ty->get_int_kind ();
 	for (const auto field : fields)
@@ -1091,8 +1090,7 @@ TypeCheckItem::validate_repr_simd (
 	  }
 	break;
       }
-    case TyTy::TypeKind::UINT:
-      {
+      case TyTy::TypeKind::UINT: {
 	auto uint_ty = static_cast<TyTy::UintType *> (first_field_ty);
 	auto uint_kind = uint_ty->get_uint_kind ();
 	for (const auto field : fields)
@@ -1112,8 +1110,7 @@ TypeCheckItem::validate_repr_simd (
 	  }
 	break;
       }
-    case TyTy::TypeKind::FLOAT:
-      {
+      case TyTy::TypeKind::FLOAT: {
 	auto float_ty = static_cast<TyTy::FloatType *> (first_field_ty);
 	auto float_kind = float_ty->get_float_kind ();
 	for (const auto field : fields)

@@ -142,7 +142,7 @@ enum class AsmKind
  * rust-macro-builtins.{h,cc}.
  */
 using MacroTranscriberFunc
-  = std::function<tl::optional<Fragment> (location_t, MacroInvocData &,
+  = std::function<gcc::optional<Fragment> (location_t, MacroInvocData &,
 					  InvocKind semicolon)>;
 
 } // namespace AST

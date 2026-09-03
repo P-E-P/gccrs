@@ -81,8 +81,7 @@ ASTLoweringPattern::visit (AST::TupleStructPattern &pattern)
   auto &items = pattern.get_items ();
   switch (items.get_item_type ())
     {
-    case AST::TupleStructItems::HAS_REST:
-      {
+      case AST::TupleStructItems::HAS_REST: {
 	AST::TupleStructItemsHasRest &items_has_rest
 	  = static_cast<AST::TupleStructItemsHasRest &> (items);
 
@@ -107,8 +106,7 @@ ASTLoweringPattern::visit (AST::TupleStructPattern &pattern)
       }
       break;
 
-    case AST::TupleStructItems::NO_REST:
-      {
+      case AST::TupleStructItems::NO_REST: {
 	AST::TupleStructItemsNoRest &items_no_rest
 	  = static_cast<AST::TupleStructItemsNoRest &> (items);
 
@@ -147,8 +145,7 @@ ASTLoweringPattern::visit (AST::StructPattern &pattern)
       HIR::StructPatternField *f = nullptr;
       switch (field->get_item_type ())
 	{
-	case AST::StructPatternField::ItemType::TUPLE_PAT:
-	  {
+	  case AST::StructPatternField::ItemType::TUPLE_PAT: {
 	    auto &tuple
 	      = static_cast<AST::StructPatternFieldTuplePat &> (*field);
 
@@ -168,8 +165,7 @@ ASTLoweringPattern::visit (AST::StructPattern &pattern)
 	  }
 	  break;
 
-	case AST::StructPatternField::ItemType::IDENT_PAT:
-	  {
+	  case AST::StructPatternField::ItemType::IDENT_PAT: {
 	    AST::StructPatternFieldIdentPat &ident
 	      = static_cast<AST::StructPatternFieldIdentPat &> (*field);
 
@@ -189,8 +185,7 @@ ASTLoweringPattern::visit (AST::StructPattern &pattern)
 	  }
 	  break;
 
-	case AST::StructPatternField::ItemType::IDENT:
-	  {
+	  case AST::StructPatternField::ItemType::IDENT: {
 	    AST::StructPatternFieldIdent &ident
 	      = static_cast<AST::StructPatternFieldIdent &> (*field.get ());
 
@@ -244,16 +239,14 @@ ASTLoweringPattern::visit (AST::TuplePattern &pattern)
   std::unique_ptr<HIR::TuplePatternItems> items;
   switch (pattern.get_items ().get_item_type ())
     {
-    case AST::TuplePatternItems::ItemType::NO_REST:
-      {
+      case AST::TuplePatternItems::ItemType::NO_REST: {
 	AST::TuplePatternItemsNoRest &ref
 	  = static_cast<AST::TuplePatternItemsNoRest &> (pattern.get_items ());
 	items = lower_tuple_pattern_multiple (ref);
       }
       break;
 
-    case AST::TuplePatternItems::ItemType::HAS_REST:
-      {
+      case AST::TuplePatternItems::ItemType::HAS_REST: {
 	AST::TuplePatternItemsHasRest &ref
 	  = static_cast<AST::TuplePatternItemsHasRest &> (pattern.get_items ());
 	items = lower_tuple_pattern_ranged (ref);
@@ -352,8 +345,8 @@ lower_pattern_seq (It begin, It end)
 void
 ASTLoweringPattern::visit (AST::SlicePattern &pattern)
 {
-  tl::optional<size_t> rest_index;
-  tl::optional<HIR::IdentifierPattern> rest_bind;
+  gcc::optional<size_t> rest_index;
+  gcc::optional<HIR::IdentifierPattern> rest_bind;
 
   std::vector<std::unique_ptr<AST::Pattern>> &sub_patterns
     = pattern.get_patterns ();

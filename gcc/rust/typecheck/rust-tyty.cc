@@ -30,7 +30,7 @@
 #include "rust-hir-type-check.h"
 #include "tree-pretty-print.h"
 
-#include "optional.h"
+#include "stdbackport/optional"
 #include "options.h"
 #include "tree.h"
 #include "fold-const.h"
@@ -438,7 +438,7 @@ BaseType::satisfies_bound (const TypeBoundPredicate &predicate, bool emit_error)
 	    continue;
 
 	  std::string item_name = item->get_impl_item_name ();
-	  tl::optional<TypeBoundPredicateItem> lookup
+	  gcc::optional<TypeBoundPredicateItem> lookup
 	    = predicate.lookup_associated_item (item_name);
 	  if (!lookup.has_value ())
 	    return false;
@@ -1707,7 +1707,7 @@ VariantDef::variant_type_string (VariantType type)
 
 VariantDef::VariantDef (HirId id, DefId defid, std::string identifier,
 			RustIdent ident,
-			tl::optional<std::unique_ptr<HIR::Expr>> &&discriminant)
+			gcc::optional<std::unique_ptr<HIR::Expr>> &&discriminant)
   : id (id), defid (defid), identifier (identifier), ident (ident),
     discriminant (std::move (discriminant))
 
@@ -1718,7 +1718,7 @@ VariantDef::VariantDef (HirId id, DefId defid, std::string identifier,
 
 VariantDef::VariantDef (HirId id, DefId defid, std::string identifier,
 			RustIdent ident, VariantType type,
-			tl::optional<std::unique_ptr<HIR::Expr>> &&discriminant,
+			gcc::optional<std::unique_ptr<HIR::Expr>> &&discriminant,
 			std::vector<StructFieldType *> fields)
   : id (id), defid (defid), identifier (identifier), ident (ident), type (type),
     discriminant (std::move (discriminant)), fields (fields)
@@ -1734,7 +1734,7 @@ VariantDef::get_error_node ()
   static VariantDef node
     = VariantDef (UNKNOWN_HIRID, UNKNOWN_DEFID, "",
 		  {Resolver::CanonicalPath::create_empty (), UNKNOWN_LOCATION},
-		  tl::nullopt);
+		  gcc::nullopt);
 
   return node;
 }
@@ -1891,9 +1891,9 @@ VariantDef::clone () const
     cloned_fields.push_back ((StructFieldType *) f->clone ());
 
   auto &&discriminant_opt = has_discriminant ()
-			      ? tl::optional<std::unique_ptr<HIR::Expr>> (
+			      ? gcc::optional<std::unique_ptr<HIR::Expr>> (
 				get_discriminant ().clone_expr ())
-			      : tl::nullopt;
+			      : gcc::nullopt;
 
   return new VariantDef (id, defid, identifier, ident, type,
 			 std::move (discriminant_opt), cloned_fields);
@@ -1907,9 +1907,9 @@ VariantDef::monomorphized_clone () const
     cloned_fields.push_back ((StructFieldType *) f->monomorphized_clone ());
 
   auto discriminant_opt = has_discriminant ()
-			    ? tl::optional<std::unique_ptr<HIR::Expr>> (
+			    ? gcc::optional<std::unique_ptr<HIR::Expr>> (
 			      get_discriminant ().clone_expr ())
-			    : tl::nullopt;
+			    : gcc::nullopt;
 
   return new VariantDef (id, defid, identifier, ident, type,
 			 std::move (discriminant_opt), cloned_fields);
@@ -4856,11 +4856,11 @@ DynamicObjectType::get_object_items () const
   return items;
 }
 
-WARN_UNUSED_RESULT tl::optional<BaseType *>
+WARN_UNUSED_RESULT gcc::optional<BaseType *>
 try_get_box_inner_type (BaseType *base)
 {
   if (base->get_kind () != TypeKind::ADT)
-    return tl::nullopt;
+    return gcc::nullopt;
 
   ADTType *adt = static_cast<ADTType *> (base);
   auto owned_box_lookup
@@ -4876,7 +4876,7 @@ try_get_box_inner_type (BaseType *base)
 	  return inner;
 	}
     }
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 } // namespace TyTy

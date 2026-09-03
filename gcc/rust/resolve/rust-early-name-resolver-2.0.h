@@ -19,7 +19,7 @@
 #ifndef RUST_EARLY_NAME_RESOLVER_2_0_H
 #define RUST_EARLY_NAME_RESOLVER_2_0_H
 
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-ast.h"
 #include "rust-ast-visitor.h"
 #include "rust-name-resolution-context.h"
@@ -195,7 +195,7 @@ private:
     void pop ();
 
     void insert (std::string name, NodeId id);
-    tl::optional<NodeId> get (const std::string &name);
+    gcc::optional<NodeId> get (const std::string &name);
 
   private:
     std::vector<std::unordered_map<std::string, NodeId>> scopes;

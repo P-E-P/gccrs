@@ -69,7 +69,7 @@ TypeCoercionRules::do_coercion (TyTy::BaseType *receiver)
     }
 
   // unsize
-  tl::expected<CoercionResult, CoerceUnsizedError> unsize_coercion
+  gcc::expected<CoercionResult, CoerceUnsizedError> unsize_coercion
     = coerce_unsized (receiver, expected);
   if (unsize_coercion)
     {
@@ -87,15 +87,13 @@ TypeCoercionRules::do_coercion (TyTy::BaseType *receiver)
   // pointers
   switch (expected->get_kind ())
     {
-    case TyTy::TypeKind::POINTER:
-      {
+      case TyTy::TypeKind::POINTER: {
 	auto *ptr = expected->as<TyTy::PointerType> ();
 	try_result = coerce_unsafe_ptr (receiver, ptr, ptr->mutability ());
 	return !try_result.is_error ();
       }
 
-    case TyTy::TypeKind::REF:
-      {
+      case TyTy::TypeKind::REF: {
 	auto *ptr = expected->as<TyTy::ReferenceType> ();
 	try_result
 	  = coerce_borrowed_pointer (receiver, ptr, ptr->mutability ());
@@ -110,8 +108,7 @@ TypeCoercionRules::do_coercion (TyTy::BaseType *receiver)
   // https://github.com/rust-lang/rust/blob/7eac88abb2e57e752f3302f02be5f3ce3d7adfb4/compiler/rustc_typeck/src/check/coercion.rs#L210
   switch (receiver->get_kind ())
     {
-    default:
-      {
+      default: {
 	rust_debug (
 	  "do_coercion default unify and infer expected: %s receiver %s",
 	  receiver->debug_str ().c_str (), expected->debug_str ().c_str ());
@@ -184,8 +181,7 @@ TypeCoercionRules::coerce_unsafe_ptr (TyTy::BaseType *receiver,
   TyTy::BaseType *element = nullptr;
   switch (receiver->get_kind ())
     {
-    case TyTy::TypeKind::REF:
-      {
+      case TyTy::TypeKind::REF: {
 	TyTy::ReferenceType *ref
 	  = static_cast<TyTy::ReferenceType *> (receiver);
 	from_mutbl = ref->mutability ();
@@ -193,16 +189,14 @@ TypeCoercionRules::coerce_unsafe_ptr (TyTy::BaseType *receiver,
       }
       break;
 
-    case TyTy::TypeKind::POINTER:
-      {
+      case TyTy::TypeKind::POINTER: {
 	TyTy::PointerType *ref = static_cast<TyTy::PointerType *> (receiver);
 	from_mutbl = ref->mutability ();
 	element = ref->get_base ();
       }
       break;
 
-    default:
-      {
+      default: {
 	if (types_compatable (TyTy::TyWithLocation (receiver),
 			      TyTy::TyWithLocation (expected), UNKNOWN_LOCATION,
 			      false))
@@ -270,13 +264,11 @@ TypeCoercionRules::coerce_borrowed_pointer (TyTy::BaseType *receiver,
   Mutability from_mutbl = Mutability::Imm;
   switch (receiver->get_kind ())
     {
-    case TyTy::TypeKind::REF:
-      {
+      case TyTy::TypeKind::REF: {
 	from_mutbl = receiver->as<TyTy::ReferenceType> ()->mutability ();
       }
       break;
-    default:
-      {
+      default: {
 	rust_debug ("coerce_borrowed_pointer -- unify");
 	TyTy::BaseType *result
 	  = unify_site_and (receiver->get_ref (),
@@ -315,8 +307,8 @@ TypeCoercionRules::coerce_borrowed_pointer (TyTy::BaseType *receiver,
 // or &mut [T; n] -> &mut [T]
 // or &Concrete -> &Trait, etc.
 // https://doc.rust-lang.org/stable/reference/type-coercions.html
-tl::expected<TypeCoercionRules::CoercionResult,
-	     TypeCoercionRules::CoerceUnsizedError>
+gcc::expected<TypeCoercionRules::CoercionResult,
+	      TypeCoercionRules::CoerceUnsizedError>
 TypeCoercionRules::coerce_unsized (TyTy::BaseType *source,
 				   TyTy::BaseType *target, bool is_inner)
 {
@@ -326,7 +318,7 @@ TypeCoercionRules::coerce_unsized (TyTy::BaseType *source,
 
   auto setup = unwrap_ptrs_and_refs (source, target);
   if (!setup)
-    return tl::unexpected<CoerceUnsizedError> (setup.error ());
+    return gcc::unexpected<CoerceUnsizedError> (setup.error ());
 
   // FIXME
   // there is a bunch of code to ensure something is coerce able to a dyn
@@ -337,8 +329,8 @@ TypeCoercionRules::coerce_unsized (TyTy::BaseType *source,
   auto a = setup->ty_a;
   auto b = setup->ty_b;
 
-  tl::expected<TyTy::BaseType *, CoerceUnsizedError> inner_result
-    = tl::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
+  gcc::expected<TyTy::BaseType *, CoerceUnsizedError> inner_result
+    = gcc::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
 
   bool expect_dyn = b->get_kind () == TyTy::TypeKind::DYNAMIC;
   bool need_unsize = a->get_kind () != TyTy::TypeKind::DYNAMIC;
@@ -352,13 +344,13 @@ TypeCoercionRules::coerce_unsized (TyTy::BaseType *source,
   if (expect_dyn && need_unsize)
     inner_result
       = (!setup->unwrapped_pointer && !is_inner)
-	  ? tl::unexpected<CoerceUnsizedError> (inner_result.error ())
+	  ? gcc::unexpected<CoerceUnsizedError> (inner_result.error ())
 	  : coerce_unsized_dyn (a, b);
 
   else if (expect_slice && is_array)
     inner_result
       = (!setup->unwrapped_pointer && !is_inner)
-	  ? tl::unexpected<CoerceUnsizedError> (inner_result.error ())
+	  ? gcc::unexpected<CoerceUnsizedError> (inner_result.error ())
 	  : coerce_unsized_array_to_slice (a, b);
 
   else if (expect_adt && is_adt)
@@ -368,7 +360,7 @@ TypeCoercionRules::coerce_unsized (TyTy::BaseType *source,
     {
       adjustments.erase (adjustments.begin () + adjustments_size,
 			 adjustments.end ());
-      return tl::unexpected<CoerceUnsizedError> (inner_result.error ());
+      return gcc::unexpected<CoerceUnsizedError> (inner_result.error ());
     }
 
   TyTy::BaseType *result = inner_result.value ();
@@ -380,8 +372,8 @@ TypeCoercionRules::coerce_unsized (TyTy::BaseType *source,
   return CoercionResult{adjustments, result};
 }
 
-tl::expected<TypeCoercionRules::CoercionSetup,
-	     TypeCoercionRules::CoerceUnsizedError>
+gcc::expected<TypeCoercionRules::CoercionSetup,
+	      TypeCoercionRules::CoerceUnsizedError>
 TypeCoercionRules::unwrap_ptrs_and_refs (TyTy::BaseType *source,
 					 TyTy::BaseType *target)
 {
@@ -409,7 +401,7 @@ TypeCoercionRules::unwrap_ptrs_and_refs (TyTy::BaseType *source,
 	  location_t lhs = mappings.lookup_location (source->get_ref ());
 	  location_t rhs = mappings.lookup_location (target->get_ref ());
 	  mismatched_mutability_error (locus, lhs, rhs);
-	  return tl::unexpected<CoerceUnsizedError> (
+	  return gcc::unexpected<CoerceUnsizedError> (
 	    CoerceUnsizedError::Unsafe);
 	}
 
@@ -435,7 +427,7 @@ TypeCoercionRules::unwrap_ptrs_and_refs (TyTy::BaseType *source,
 	  location_t lhs = mappings.lookup_location (source->get_ref ());
 	  location_t rhs = mappings.lookup_location (target->get_ref ());
 	  mismatched_mutability_error (locus, lhs, rhs);
-	  return tl::unexpected<CoerceUnsizedError> (
+	  return gcc::unexpected<CoerceUnsizedError> (
 	    CoerceUnsizedError::Unsafe);
 	}
 
@@ -460,7 +452,7 @@ TypeCoercionRules::unwrap_ptrs_and_refs (TyTy::BaseType *source,
 	  location_t lhs = mappings.lookup_location (source->get_ref ());
 	  location_t rhs = mappings.lookup_location (target->get_ref ());
 	  mismatched_mutability_error (locus, lhs, rhs);
-	  return tl::unexpected<CoerceUnsizedError> (
+	  return gcc::unexpected<CoerceUnsizedError> (
 	    CoerceUnsizedError::Unsafe);
 	}
 
@@ -478,7 +470,7 @@ TypeCoercionRules::unwrap_ptrs_and_refs (TyTy::BaseType *source,
 		       unwrapped_pointer};
 }
 
-tl::expected<TyTy::BaseType *, TypeCoercionRules::CoerceUnsizedError>
+gcc::expected<TyTy::BaseType *, TypeCoercionRules::CoerceUnsizedError>
 TypeCoercionRules::coerce_unsized_array_to_slice (TyTy::BaseType *a,
 						  TyTy::BaseType *b)
 {
@@ -489,7 +481,7 @@ TypeCoercionRules::coerce_unsized_array_to_slice (TyTy::BaseType *a,
   TyTy::BaseType *slice_element = slice_type->get_element_type ();
 
   if (!array_element->is_equal (*slice_element))
-    return tl::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
+    return gcc::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
 
   TyTy::BaseType *result = b->clone ();
 
@@ -497,12 +489,12 @@ TypeCoercionRules::coerce_unsized_array_to_slice (TyTy::BaseType *a,
 
   return result;
 }
-tl::expected<TyTy::BaseType *, TypeCoercionRules::CoerceUnsizedError>
+gcc::expected<TyTy::BaseType *, TypeCoercionRules::CoerceUnsizedError>
 TypeCoercionRules::coerce_unsized_dyn (TyTy::BaseType *a, TyTy::BaseType *b)
 {
   bool bounds_compatible = b->bounds_compatible (*a, locus, false);
   if (!bounds_compatible)
-    return tl::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Unsafe);
+    return gcc::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Unsafe);
 
   // return the unsize coercion
   TyTy::BaseType *result = b->clone ();
@@ -513,7 +505,7 @@ TypeCoercionRules::coerce_unsized_dyn (TyTy::BaseType *a, TyTy::BaseType *b)
 
   return result;
 }
-tl::expected<TyTy::BaseType *, TypeCoercionRules::CoerceUnsizedError>
+gcc::expected<TyTy::BaseType *, TypeCoercionRules::CoerceUnsizedError>
 TypeCoercionRules::coerce_unsized_adt (TyTy::BaseType *a, TyTy::BaseType *b,
 				       bool needs_reborrow)
 {
@@ -525,7 +517,7 @@ TypeCoercionRules::coerce_unsized_adt (TyTy::BaseType *a, TyTy::BaseType *b,
       || (source_adt->get_id () != target_adt->get_id ())
       || (source_adt->get_variants ().front ()->num_fields ()
 	  != target_adt->get_variants ().front ()->num_fields ()))
-    return tl::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
+    return gcc::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
 
   auto source_variant = source_adt->get_variants ().front ();
   auto target_variant = target_adt->get_variants ().front ();
@@ -566,16 +558,16 @@ TypeCoercionRules::coerce_unsized_adt (TyTy::BaseType *a, TyTy::BaseType *b,
     }
 
   if (diff_count != 1)
-    return tl::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
+    return gcc::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
 
   if (needs_reborrow && !is_last_field)
-    return tl::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
+    return gcc::unexpected<CoerceUnsizedError> (CoerceUnsizedError::Regular);
 
   auto adjustments_size = adjustments.size ();
   auto inner_coercion
     = coerce_unsized (differing_source_field, differing_target_field, true);
   if (!inner_coercion)
-    return tl::unexpected<CoerceUnsizedError> (inner_coercion.error ());
+    return gcc::unexpected<CoerceUnsizedError> (inner_coercion.error ());
   adjustments.erase (adjustments.begin () + adjustments_size,
 		     adjustments.end ());
 

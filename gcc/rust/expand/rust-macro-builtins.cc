@@ -16,9 +16,9 @@
 // along with GCC; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include "expected.h"
+#include "stdbackport/expected"
 #include "libproc_macro_internal/tokenstream.h"
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-ast-full-decls.h"
 #include "rust-builtin-ast-nodes.h"
 #include "rust-expand-format-args.h"
@@ -169,7 +169,7 @@ std::unordered_map<std::string, AST::MacroTranscriberFunc>
     {"cfg_select", MacroBuiltin::cfg_select_handler},
 };
 
-tl::optional<BuiltinMacro>
+gcc::optional<BuiltinMacro>
 builtin_macro_from_string (const std::string &identifier)
 {
   auto macro = MacroBuiltin::builtins.lookup (identifier);
@@ -178,7 +178,7 @@ builtin_macro_from_string (const std::string &identifier)
   return macro;
 }
 
-tl::optional<AST::Fragment>
+gcc::optional<AST::Fragment>
 MacroBuiltin::sorry (location_t invoc_locus, AST::MacroInvocData &invoc,
 		     AST::InvocKind semicolon)
 {
@@ -188,7 +188,7 @@ MacroBuiltin::sorry (location_t invoc_locus, AST::MacroInvocData &invoc,
   return AST::Fragment::create_error ();
 }
 
-tl::optional<AST::Fragment>
+gcc::optional<AST::Fragment>
 MacroBuiltin::proc_macro_builtin (location_t invoc_locus,
 				  AST::MacroInvocData &invoc,
 				  AST::InvocKind semicolon)

@@ -19,7 +19,7 @@
 #ifndef RUST_MACRO_EXPAND_H
 #define RUST_MACRO_EXPAND_H
 
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-ast-fragment.h"
 #include "rust-buffered-queue.h"
 #include "rust-parse.h"
@@ -411,7 +411,7 @@ struct MacroExpander
   template <typename T>
   AST::Fragment expand_derive_proc_macro (T &item, AST::SimplePath &path)
   {
-    tl::optional<CustomDeriveProcMacro &> macro
+    gcc::optional<CustomDeriveProcMacro &> macro
       = mappings.lookup_derive_proc_macro_invocation (path);
     if (!macro.has_value ())
       {
@@ -434,7 +434,7 @@ struct MacroExpander
   AST::Fragment expand_bang_proc_macro (T &item,
 					AST::MacroInvocation &invocation)
   {
-    tl::optional<BangProcMacro &> macro
+    gcc::optional<BangProcMacro &> macro
       = mappings.lookup_bang_proc_macro_invocation (invocation);
     if (!macro.has_value ())
       {
@@ -456,7 +456,7 @@ struct MacroExpander
   template <typename T>
   AST::Fragment expand_attribute_proc_macro (T &item, AST::SimplePath &path)
   {
-    tl::optional<AttributeProcMacro &> macro
+    gcc::optional<AttributeProcMacro &> macro
       = mappings.lookup_attribute_proc_macro_invocation (path);
     if (!macro.has_value ())
       {
@@ -488,12 +488,12 @@ struct MacroExpander
    */
   void reset_changed_state () { has_changed_flag = false; }
 
-  tl::optional<AST::MacroRulesDefinition &> &get_last_definition ()
+  gcc::optional<AST::MacroRulesDefinition &> &get_last_definition ()
   {
     return last_def;
   }
 
-  tl::optional<AST::MacroInvocation &> &get_last_invocation ()
+  gcc::optional<AST::MacroInvocation &> &get_last_invocation ()
   {
     return last_invoc;
   }
@@ -507,8 +507,8 @@ private:
   AST::Fragment expanded_fragment;
   bool has_changed_flag;
 
-  tl::optional<AST::MacroRulesDefinition &> last_def;
-  tl::optional<AST::MacroInvocation &> last_invoc;
+  gcc::optional<AST::MacroRulesDefinition &> last_def;
+  gcc::optional<AST::MacroInvocation &> last_invoc;
 
   // used to avoid emitting excess errors
   bool had_duplicate_error;

@@ -83,7 +83,7 @@ query_type (HirId reference, TyTy::BaseType **result)
       auto impl_block
 	= mappings.lookup_hir_impl_block (impl_item->second).value ();
 
-      tl::optional<ImplTraitFrameGuard> guard;
+      gcc::optional<ImplTraitFrameGuard> guard;
       if (impl_block->has_trait_ref ())
 	{
 	  bool failure_flag = false;
@@ -160,7 +160,7 @@ query_type (HirId reference, TyTy::BaseType **result)
 
 	  if (ref_node_id != UNKNOWN_NODEID)
 	    {
-	      tl::optional<HirId> hid
+	      gcc::optional<HirId> hid
 		= mappings.lookup_node_to_hir (ref_node_id);
 	      if (hid.has_value () && context->query_in_progress (hid.value ()))
 		{

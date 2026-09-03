@@ -17,7 +17,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "rust-hir-map.h"
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-ast-full.h"
 #include "rust-ast.h"
 #include "rust-diagnostics.h"
@@ -139,22 +139,22 @@ Mappings::get_current_crate () const
   return currentCrateNum;
 }
 
-tl::optional<const std::string &>
+gcc::optional<const std::string &>
 Mappings::get_crate_name (CrateNum crate_num) const
 {
   auto it = crate_names.find (crate_num);
   if (it == crate_names.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<CrateNum>
+gcc::optional<CrateNum>
 Mappings::lookup_crate_num (NodeId node_id) const
 {
   auto it = crate_node_to_crate_num.find (node_id);
   if (it == crate_node_to_crate_num.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -171,7 +171,7 @@ Mappings::get_current_crate_name () const
   return get_crate_name (get_current_crate ()).value ();
 }
 
-tl::optional<CrateNum>
+gcc::optional<CrateNum>
 Mappings::lookup_crate_name (const std::string &crate_name) const
 {
   for (const auto &it : crate_names)
@@ -179,15 +179,15 @@ Mappings::lookup_crate_name (const std::string &crate_name) const
       if (it.second.compare (crate_name) == 0)
 	return it.first;
     }
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
-tl::optional<NodeId>
+gcc::optional<NodeId>
 Mappings::crate_num_to_nodeid (const CrateNum &crate_num) const
 {
   auto it = ast_crate_mappings.find (crate_num);
   if (it == ast_crate_mappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second->get_node_id ();
 }
@@ -334,12 +334,12 @@ Mappings::insert_defid_mapping (DefId id, HIR::Item *item)
   insert_local_defid_mapping (crate_num, local_def_id, item);
 }
 
-tl::optional<HIR::Item *>
+gcc::optional<HIR::Item *>
 Mappings::lookup_defid (DefId id)
 {
   auto it = defIdMappings.find (id);
   if (it == defIdMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -357,12 +357,12 @@ Mappings::insert_defid_mapping (DefId id, HIR::TraitItem *item)
   defIdTraitItemMappings[id] = item;
 }
 
-tl::optional<HIR::TraitItem *>
+gcc::optional<HIR::TraitItem *>
 Mappings::lookup_trait_item_defid (DefId id)
 {
   auto it = defIdTraitItemMappings.find (id);
   if (it == defIdTraitItemMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -377,12 +377,12 @@ Mappings::insert_hir_item (HIR::Item *item)
   insert_node_to_hir (item->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::Item *>
+gcc::optional<HIR::Item *>
 Mappings::lookup_hir_item (HirId id)
 {
   auto it = hirItemMappings.find (id);
   if (it == hirItemMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
   return it->second;
 }
 
@@ -417,12 +417,12 @@ Mappings::insert_hir_trait_item (HIR::TraitItem *item)
   insert_node_to_hir (item->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::TraitItem *>
+gcc::optional<HIR::TraitItem *>
 Mappings::lookup_hir_trait_item (HirId id)
 {
   auto it = hirTraitItemMappings.find (id);
   if (it == hirTraitItemMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -437,12 +437,12 @@ Mappings::insert_hir_extern_block (HIR::ExternBlock *block)
   insert_node_to_hir (block->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::ExternBlock *>
+gcc::optional<HIR::ExternBlock *>
 Mappings::lookup_hir_extern_block (HirId id)
 {
   auto it = hirExternBlockMappings.find (id);
   if (it == hirExternBlockMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -457,12 +457,12 @@ Mappings::insert_hir_extern_item (HIR::ExternalItem *item, HirId parent_block)
   insert_node_to_hir (item->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<std::pair<HIR::ExternalItem *, HirId>>
+gcc::optional<std::pair<HIR::ExternalItem *, HirId>>
 Mappings::lookup_hir_extern_item (HirId id)
 {
   auto it = hirExternItemMappings.find (id);
   if (it == hirExternItemMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -479,22 +479,22 @@ Mappings::insert_hir_impl_block (HIR::ImplBlock *item)
   insert_node_to_hir (item->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::ImplBlock *>
+gcc::optional<HIR::ImplBlock *>
 Mappings::lookup_hir_impl_block (HirId id)
 {
   auto it = hirImplBlockMappings.find (id);
   if (it == hirImplBlockMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<HIR::ImplBlock *>
+gcc::optional<HIR::ImplBlock *>
 Mappings::lookup_impl_block_type (HirId id)
 {
   auto it = hirImplBlockTypeMappings.find (id);
   if (it == hirImplBlockTypeMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -509,12 +509,12 @@ Mappings::insert_module (HIR::Module *module)
   insert_node_to_hir (module->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::Module *>
+gcc::optional<HIR::Module *>
 Mappings::lookup_module (HirId id)
 {
   auto it = hirModuleMappings.find (id);
   if (it == hirModuleMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -530,12 +530,12 @@ Mappings::insert_hir_implitem (HirId parent_impl_id, HIR::ImplItem *item)
   insert_node_to_hir (item->get_impl_mappings ().get_nodeid (), id);
 }
 
-tl::optional<std::pair<HIR::ImplItem *, HirId>>
+gcc::optional<std::pair<HIR::ImplItem *, HirId>>
 Mappings::lookup_hir_implitem (HirId id)
 {
   auto it = hirImplItemMappings.find (id);
   if (it == hirImplItemMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return std::make_pair (it->second.second, it->second.first);
 }
@@ -550,12 +550,12 @@ Mappings::insert_hir_expr (HIR::Expr *expr)
   insert_location (id, expr->get_locus ());
 }
 
-tl::optional<HIR::Expr *>
+gcc::optional<HIR::Expr *>
 Mappings::lookup_hir_expr (HirId id)
 {
   auto it = hirExprMappings.find (id);
   if (it == hirExprMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -571,12 +571,12 @@ Mappings::insert_hir_path_expr_seg (HIR::PathExprSegment *expr)
   insert_location (id, expr->get_locus ());
 }
 
-tl::optional<HIR::PathExprSegment *>
+gcc::optional<HIR::PathExprSegment *>
 Mappings::lookup_hir_path_expr_seg (HirId id)
 {
   auto it = hirPathSegMappings.find (id);
   if (it == hirPathSegMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -592,12 +592,12 @@ Mappings::insert_hir_generic_param (HIR::GenericParam *param)
   insert_location (id, param->get_locus ());
 }
 
-tl::optional<HIR::GenericParam *>
+gcc::optional<HIR::GenericParam *>
 Mappings::lookup_hir_generic_param (HirId id)
 {
   auto it = hirGenericParamMappings.find (id);
   if (it == hirGenericParamMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -612,12 +612,12 @@ Mappings::insert_hir_type (HIR::Type *type)
   insert_node_to_hir (type->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::Type *>
+gcc::optional<HIR::Type *>
 Mappings::lookup_hir_type (HirId id)
 {
   auto it = hirTypeMappings.find (id);
   if (it == hirTypeMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -632,12 +632,12 @@ Mappings::insert_hir_stmt (HIR::Stmt *stmt)
   insert_node_to_hir (stmt->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::Stmt *>
+gcc::optional<HIR::Stmt *>
 Mappings::lookup_hir_stmt (HirId id)
 {
   auto it = hirStmtMappings.find (id);
   if (it == hirStmtMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -652,12 +652,12 @@ Mappings::insert_hir_param (HIR::FunctionParam *param)
   insert_node_to_hir (param->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::FunctionParam *>
+gcc::optional<HIR::FunctionParam *>
 Mappings::lookup_hir_param (HirId id)
 {
   auto it = hirParamMappings.find (id);
   if (it == hirParamMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -672,12 +672,12 @@ Mappings::insert_hir_self_param (HIR::SelfParam *param)
   insert_node_to_hir (param->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::SelfParam *>
+gcc::optional<HIR::SelfParam *>
 Mappings::lookup_hir_self_param (HirId id)
 {
   auto it = hirSelfParamMappings.find (id);
   if (it == hirSelfParamMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -692,12 +692,12 @@ Mappings::insert_hir_struct_field (HIR::StructExprField *field)
   insert_node_to_hir (field->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::StructExprField *>
+gcc::optional<HIR::StructExprField *>
 Mappings::lookup_hir_struct_field (HirId id)
 {
   auto it = hirStructFieldMappings.find (id);
   if (it == hirStructFieldMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -712,12 +712,12 @@ Mappings::insert_hir_pattern (HIR::Pattern *pattern)
   insert_node_to_hir (pattern->get_mappings ().get_nodeid (), id);
 }
 
-tl::optional<HIR::Pattern *>
+gcc::optional<HIR::Pattern *>
 Mappings::lookup_hir_pattern (HirId id)
 {
   auto it = hirPatternMappings.find (id);
   if (it == hirPatternMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -730,16 +730,16 @@ Mappings::insert_local_defid_mapping (CrateNum crateNum, LocalDefId id,
   localDefIdMappings[crateNum][id] = item;
 }
 
-tl::optional<HIR::Item *>
+gcc::optional<HIR::Item *>
 Mappings::lookup_local_defid (CrateNum crateNum, LocalDefId id)
 {
   auto it = localDefIdMappings.find (crateNum);
   if (it == localDefIdMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   auto iy = it->second.find (id);
   if (iy == it->second.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return iy->second;
 }
@@ -766,22 +766,22 @@ Mappings::insert_node_to_hir (NodeId id, HirId ref)
   hirIdToNodeMappings[ref] = id;
 }
 
-tl::optional<HirId>
+gcc::optional<HirId>
 Mappings::lookup_node_to_hir (NodeId id)
 {
   auto it = nodeIdToHirMappings.find (id);
   if (it == nodeIdToHirMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return {it->second};
 }
 
-tl::optional<NodeId>
+gcc::optional<NodeId>
 Mappings::lookup_hir_to_node (HirId id)
 {
   auto it = hirIdToNodeMappings.find (id);
   if (it == hirIdToNodeMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return {it->second};
 }
@@ -802,12 +802,12 @@ Mappings::lookup_location (HirId id)
   return it->second;
 }
 
-tl::optional<HIR::Stmt *>
+gcc::optional<HIR::Stmt *>
 Mappings::resolve_nodeid_to_stmt (NodeId id)
 {
   auto it = nodeIdToHirMappings.find (id);
   if (it == nodeIdToHirMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   HirId resolved = it->second;
   return lookup_hir_stmt (resolved);
@@ -891,22 +891,22 @@ Mappings::insert_macro_def (AST::MacroRulesDefinition *macro)
   macroMappings[macro->get_node_id ()] = {macro, currentCrateNum};
 }
 
-tl::optional<AST::MacroRulesDefinition *>
+gcc::optional<AST::MacroRulesDefinition *>
 Mappings::lookup_macro_def (NodeId id)
 {
   auto it = macroMappings.find (id);
   if (it == macroMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second.first;
 }
 
-tl::optional<CrateNum>
+gcc::optional<CrateNum>
 Mappings::lookup_macro_def_crate (NodeId id)
 {
   auto it = macroMappings.find (id);
   if (it == macroMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second.second;
 }
@@ -921,12 +921,12 @@ Mappings::insert_macro_invocation (AST::MacroInvocation &invoc,
   macroInvocations[invoc.get_node_id ()] = def;
 }
 
-tl::optional<AST::MacroRulesDefinition *>
+gcc::optional<AST::MacroRulesDefinition *>
 Mappings::lookup_macro_invocation (AST::MacroInvocation &invoc)
 {
   auto it = macroInvocations.find (invoc.get_node_id ());
   if (it == macroInvocations.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -973,32 +973,32 @@ Mappings::insert_attribute_proc_macros (CrateNum num,
   procmacrosAttributeMappings[num] = macros;
 }
 
-tl::optional<std::vector<CustomDeriveProcMacro> &>
+gcc::optional<std::vector<CustomDeriveProcMacro> &>
 Mappings::lookup_derive_proc_macros (CrateNum num)
 {
   auto it = procmacrosDeriveMappings.find (num);
   if (it == procmacrosDeriveMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<std::vector<BangProcMacro> &>
+gcc::optional<std::vector<BangProcMacro> &>
 Mappings::lookup_bang_proc_macros (CrateNum num)
 {
   auto it = procmacrosBangMappings.find (num);
   if (it == procmacrosBangMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<std::vector<AttributeProcMacro> &>
+gcc::optional<std::vector<AttributeProcMacro> &>
 Mappings::lookup_attribute_proc_macros (CrateNum num)
 {
   auto it = procmacrosAttributeMappings.find (num);
   if (it == procmacrosAttributeMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1030,32 +1030,32 @@ Mappings::insert_attribute_proc_macro_def (AttributeProcMacro macro)
   procmacroAttributeMappings[macro.get_node_id ()] = macro;
 }
 
-tl::optional<CustomDeriveProcMacro &>
+gcc::optional<CustomDeriveProcMacro &>
 Mappings::lookup_derive_proc_macro_def (NodeId id)
 {
   auto it = procmacroDeriveMappings.find (id);
   if (it == procmacroDeriveMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<BangProcMacro &>
+gcc::optional<BangProcMacro &>
 Mappings::lookup_bang_proc_macro_def (NodeId id)
 {
   auto it = procmacroBangMappings.find (id);
   if (it == procmacroBangMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<AttributeProcMacro &>
+gcc::optional<AttributeProcMacro &>
 Mappings::lookup_attribute_proc_macro_def (NodeId id)
 {
   auto it = procmacroAttributeMappings.find (id);
   if (it == procmacroAttributeMappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1070,12 +1070,12 @@ Mappings::insert_derive_proc_macro_invocation (AST::SimplePath &invoc,
   procmacroDeriveInvocations[invoc.get_node_id ()] = def;
 }
 
-tl::optional<CustomDeriveProcMacro &>
+gcc::optional<CustomDeriveProcMacro &>
 Mappings::lookup_derive_proc_macro_invocation (AST::SimplePath &invoc)
 {
   auto it = procmacroDeriveInvocations.find (invoc.get_node_id ());
   if (it == procmacroDeriveInvocations.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1090,12 +1090,12 @@ Mappings::insert_bang_proc_macro_invocation (AST::MacroInvocation &invoc,
   procmacroBangInvocations[invoc.get_node_id ()] = def;
 }
 
-tl::optional<BangProcMacro &>
+gcc::optional<BangProcMacro &>
 Mappings::lookup_bang_proc_macro_invocation (AST::MacroInvocation &invoc)
 {
   auto it = procmacroBangInvocations.find (invoc.get_node_id ());
   if (it == procmacroBangInvocations.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1110,12 +1110,12 @@ Mappings::insert_attribute_proc_macro_invocation (AST::SimplePath &invoc,
   procmacroAttributeInvocations[invoc.get_node_id ()] = def;
 }
 
-tl::optional<AttributeProcMacro &>
+gcc::optional<AttributeProcMacro &>
 Mappings::lookup_attribute_proc_macro_invocation (AST::SimplePath &invoc)
 {
   auto it = procmacroAttributeInvocations.find (invoc.get_node_id ());
   if (it == procmacroAttributeInvocations.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1126,12 +1126,12 @@ Mappings::insert_visibility (NodeId id, Privacy::ModuleVisibility visibility)
   visibility_map.insert ({id, visibility});
 }
 
-tl::optional<Privacy::ModuleVisibility &>
+gcc::optional<Privacy::ModuleVisibility &>
 Mappings::lookup_visibility (NodeId id)
 {
   auto it = visibility_map.find (id);
   if (it == visibility_map.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1146,12 +1146,12 @@ Mappings::insert_module_child (NodeId module, NodeId child)
     it->second.emplace_back (child);
 }
 
-tl::optional<std::vector<NodeId> &>
+gcc::optional<std::vector<NodeId> &>
 Mappings::lookup_module_children (NodeId module)
 {
   auto it = module_child_map.find (module);
   if (it == module_child_map.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1192,12 +1192,12 @@ Mappings::is_extern_crate (NodeId id)
   return extern_crate_ids.find (id) != extern_crate_ids.end ();
 }
 
-tl::optional<AST::GlobContainer *>
+gcc::optional<AST::GlobContainer *>
 Mappings::lookup_glob_container (NodeId id)
 {
   auto it = glob_containers.find (id);
   if (it == glob_containers.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return {it->second};
 }
@@ -1216,23 +1216,23 @@ Mappings::insert_module_child_item (NodeId module,
     it->second.emplace_back (child);
 }
 
-tl::optional<std::vector<Resolver::CanonicalPath> &>
+gcc::optional<std::vector<Resolver::CanonicalPath> &>
 Mappings::lookup_module_chidren_items (NodeId module)
 {
   auto it = module_child_items.find (module);
   if (it == module_child_items.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
 
-tl::optional<Resolver::CanonicalPath &>
+gcc::optional<Resolver::CanonicalPath &>
 Mappings::lookup_module_child (NodeId module, const std::string &item_name)
 {
-  tl::optional<std::vector<Resolver::CanonicalPath> &> children
+  gcc::optional<std::vector<Resolver::CanonicalPath> &> children
     = lookup_module_chidren_items (module);
   if (!children.has_value ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   // lookup the children to match the name if we can
   for (auto &child : children.value ())
@@ -1243,7 +1243,7 @@ Mappings::lookup_module_child (NodeId module, const std::string &item_name)
 	return child;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 void
@@ -1253,12 +1253,12 @@ Mappings::insert_child_item_to_parent_module_mapping (NodeId child_item,
   child_to_parent_module_map.insert ({child_item, parent_module});
 }
 
-tl::optional<NodeId>
+gcc::optional<NodeId>
 Mappings::lookup_parent_module (NodeId child_item)
 {
   auto it = child_to_parent_module_map.find (child_item);
   if (it == child_to_parent_module_map.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1278,12 +1278,12 @@ Mappings::insert_ast_item (AST::Item *item)
   ast_item_mappings[item->get_node_id ()] = item;
 }
 
-tl::optional<AST::Item *>
+gcc::optional<AST::Item *>
 Mappings::lookup_ast_item (NodeId id)
 {
   auto it = ast_item_mappings.find (id);
   if (it == ast_item_mappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1307,7 +1307,7 @@ Mappings::get_lang_item (LangItem::Kind item_type, location_t locus)
 		    LangItem::ToString (item_type).c_str ());
 }
 
-tl::optional<HIR::TraitItem *>
+gcc::optional<HIR::TraitItem *>
 Mappings::lookup_trait_item_lang_item (LangItem::Kind item, location_t locus)
 {
   DefId trait_item_id = get_lang_item (item, locus);
@@ -1323,12 +1323,12 @@ Mappings::insert_lang_item (LangItem::Kind item_type, DefId id)
   lang_item_mappings[item_type] = id;
 }
 
-tl::optional<DefId &>
+gcc::optional<DefId &>
 Mappings::lookup_lang_item (LangItem::Kind item_type)
 {
   auto it = lang_item_mappings.find (item_type);
   if (it == lang_item_mappings.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1342,12 +1342,12 @@ Mappings::insert_lang_item_node (LangItem::Kind item_type, NodeId node_id)
   lang_item_nodes.insert ({item_type, node_id});
 }
 
-tl::optional<NodeId &>
+gcc::optional<NodeId &>
 Mappings::lookup_lang_item_node (LangItem::Kind item_type)
 {
   auto it = lang_item_nodes.find (item_type);
   if (it == lang_item_nodes.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return it->second;
 }
@@ -1403,12 +1403,12 @@ Mappings::add_capture (NodeId closure, NodeId definition)
     cap->second.push_back (definition);
 }
 
-tl::optional<std::vector<NodeId>>
+gcc::optional<std::vector<NodeId>>
 Mappings::lookup_captures (NodeId closure)
 {
   auto cap = captures.find (closure);
   if (cap == captures.end ())
-    return tl::nullopt;
+    return gcc::nullopt;
   else
     return cap->second;
 }

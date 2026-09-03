@@ -366,7 +366,7 @@ PathProbeType::process_predicate_for_candidates (
 {
   const TraitReference *trait_ref = predicate.get ();
 
-  tl::optional<TyTy::TypeBoundPredicateItem> item
+  gcc::optional<TyTy::TypeBoundPredicateItem> item
     = predicate.lookup_associated_item (search.to_string ());
   if (!item.has_value ())
     return;

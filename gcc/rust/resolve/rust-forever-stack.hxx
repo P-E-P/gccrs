@@ -16,14 +16,14 @@
 // along with GCC; see the file COPYING3.  If not see
 // <http://www.gnu.org/licenses/>.
 
-#include "expected.h"
+#include "stdbackport/expected"
 #include "rust-ast.h"
 #include "rust-diagnostics.h"
 #include "rust-forever-stack.h"
 #include "rust-edition.h"
 #include "rust-rib.h"
 #include "rust-unwrap-segment.h"
-#include "optional.h"
+#include "stdbackport/optional"
 
 namespace Rust {
 namespace Resolver2_0 {
@@ -58,7 +58,7 @@ ForeverStackBase::Node::insert_child (Link link, Node child)
 template <Namespace N>
 void
 ForeverStack<N>::push (Rib::Kind rib_kind, NodeId id,
-		       tl::optional<Identifier> path)
+		       gcc::optional<Identifier> path)
 {
   push_inner (rib_kind, Link (id, path));
 }
@@ -117,14 +117,14 @@ ForeverStack<N>::pop ()
   update_cursor (cursor ().parent.value ());
 }
 
-static tl::expected<NodeId, DuplicateNameError>
+static gcc::expected<NodeId, DuplicateNameError>
 insert_inner (Rib &rib, std::string name, Rib::Definition definition)
 {
   return rib.insert (name, definition);
 }
 
 template <Namespace N>
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<N>::insert (Identifier name, NodeId node)
 {
   auto &innermost_rib = peek ();
@@ -138,7 +138,7 @@ ForeverStack<N>::insert (Identifier name, NodeId node)
 }
 
 template <Namespace N>
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<N>::insert_shadowable (Identifier name, NodeId node)
 {
   auto &innermost_rib = peek ();
@@ -148,7 +148,7 @@ ForeverStack<N>::insert_shadowable (Identifier name, NodeId node)
 }
 
 template <Namespace N>
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<N>::insert_globbed (Identifier name, NodeId node)
 {
   auto &innermost_rib = peek ();
@@ -158,7 +158,7 @@ ForeverStack<N>::insert_globbed (Identifier name, NodeId node)
 }
 
 template <Namespace N>
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<N>::insert_at_root (Identifier name, NodeId node)
 {
   auto &root_rib = root.rib (N);
@@ -172,7 +172,7 @@ ForeverStack<N>::insert_at_root (Identifier name, NodeId node)
 // Specialization for Macros and Labels - where we are allowed to shadow
 // existing definitions
 template <>
-inline tl::expected<NodeId, DuplicateNameError>
+inline gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<Namespace::Macros>::insert (Identifier name, NodeId node)
 {
   return insert_inner (peek (), name.as_string (),
@@ -180,7 +180,7 @@ ForeverStack<Namespace::Macros>::insert (Identifier name, NodeId node)
 }
 
 template <>
-inline tl::expected<NodeId, DuplicateNameError>
+inline gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<Namespace::Labels>::insert (Identifier name, NodeId node)
 {
   return insert_inner (peek (), name.as_string (),
@@ -188,7 +188,7 @@ ForeverStack<Namespace::Labels>::insert (Identifier name, NodeId node)
 }
 
 template <>
-inline tl::expected<NodeId, DuplicateNameError>
+inline gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<Namespace::Types>::insert_variant (Identifier name, NodeId node)
 {
   return insert_inner (peek (), name.as_string (),
@@ -196,7 +196,7 @@ ForeverStack<Namespace::Types>::insert_variant (Identifier name, NodeId node)
 }
 
 template <>
-inline tl::expected<NodeId, DuplicateNameError>
+inline gcc::expected<NodeId, DuplicateNameError>
 ForeverStack<Namespace::Values>::insert_variant (Identifier name, NodeId node)
 {
   return insert_inner (peek (), name.as_string (),
@@ -302,10 +302,10 @@ ForeverStack<N>::update_cursor (Node &new_cursor)
 }
 
 template <Namespace N>
-tl::optional<Rib::Definition>
+gcc::optional<Rib::Definition>
 ForeverStack<N>::get (Node &start, const Identifier &name)
 {
-  tl::optional<Rib::Definition> resolved_definition = tl::nullopt;
+  gcc::optional<Rib::Definition> resolved_definition = gcc::nullopt;
 
   // TODO: Can we improve the API? have `reverse_iter` return an optional?
   reverse_iter (start, [&resolved_definition, &name] (Node &current) {
@@ -340,42 +340,42 @@ ForeverStack<N>::get (Node &start, const Identifier &name)
 }
 
 template <Namespace N>
-tl::optional<Rib::Definition>
+gcc::optional<Rib::Definition>
 ForeverStack<N>::get (const Identifier &name)
 {
   return get (cursor (), name);
 }
 
 template <Namespace N>
-tl::optional<Rib::Definition>
+gcc::optional<Rib::Definition>
 ForeverStack<N>::get_lang_prelude (const Identifier &name)
 {
   return lang_prelude.rib (N).get (name.as_string ());
 }
 
 template <Namespace N>
-tl::optional<Rib::Definition>
+gcc::optional<Rib::Definition>
 ForeverStack<N>::get_lang_prelude (const std::string &name)
 {
   return lang_prelude.rib (N).get (name);
 }
 
 template <Namespace N>
-tl::optional<Rib::Definition>
+gcc::optional<Rib::Definition>
 ForeverStack<N>::get_from_prelude (NodeId prelude, const Identifier &name)
 {
   auto starting_point = dfs_node (root, prelude);
   if (!starting_point)
-    return tl::nullopt;
+    return gcc::nullopt;
 
   return get (*starting_point, name);
 }
 
 template <>
-tl::optional<Rib::Definition> inline ForeverStack<Namespace::Labels>::get (
+gcc::optional<Rib::Definition> inline ForeverStack<Namespace::Labels>::get (
   const Identifier &name)
 {
-  tl::optional<Rib::Definition> resolved_definition = tl::nullopt;
+  gcc::optional<Rib::Definition> resolved_definition = gcc::nullopt;
 
   reverse_iter ([&resolved_definition, &name] (Node &current) {
     // looking up for labels cannot go through function ribs
@@ -386,13 +386,13 @@ tl::optional<Rib::Definition> inline ForeverStack<Namespace::Labels>::get (
     auto candidate = current.rib_labels.get (name.as_string ());
 
     // FIXME: Factor this in a function with the generic `get`
-    return candidate.map_or (
-      [&resolved_definition] (Rib::Definition found) {
+    return candidate
+      .transform ([&resolved_definition] (Rib::Definition found) {
 	resolved_definition = found;
 
 	return KeepGoing::No;
-      },
-      KeepGoing::Yes);
+      })
+      .value_or (KeepGoing::Yes);
   });
 
   return resolved_definition;
@@ -454,7 +454,7 @@ check_leading_kw_at_start (std::vector<Error> &collect_errors,
 // `super` segment, we go back to the cursor's parent until we reach the
 // correct one or the root.
 template <Namespace N>
-tl::optional<typename std::vector<ResolutionPath::Segment>::const_iterator>
+gcc::optional<typename std::vector<ResolutionPath::Segment>::const_iterator>
 ForeverStack<N>::find_starting_point (
   const std::vector<ResolutionPath::Segment> &segments,
   std::reference_wrapper<Node> &starting_point,
@@ -479,7 +479,7 @@ ForeverStack<N>::find_starting_point (
       if (check_leading_kw_at_start (collect_errors, seg,
 				     !is_start (iterator, segments)
 				       && is_self_or_crate))
-	return tl::nullopt;
+	return gcc::nullopt;
 
       if (seg.is_crate_path_seg ())
 	{
@@ -506,7 +506,7 @@ ForeverStack<N>::find_starting_point (
 	      collect_errors.emplace_back (
 		seg.locus, ErrorCode::E0433,
 		"too many leading %<super%> keywords");
-	      return tl::nullopt;
+	      return gcc::nullopt;
 	    }
 
 	  starting_point
@@ -527,7 +527,7 @@ ForeverStack<N>::find_starting_point (
 }
 
 template <Namespace N>
-tl::optional<typename ForeverStack<N>::DfsResult>
+gcc::optional<typename ForeverStack<N>::DfsResult>
 ForeverStack<N>::dfs (ForeverStack<N>::Node &starting_point, NodeId to_find)
 {
   auto values = starting_point.rib (N).get_values ();
@@ -553,11 +553,11 @@ ForeverStack<N>::dfs (ForeverStack<N>::Node &starting_point, NodeId to_find)
 	return candidate;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 template <Namespace N>
-tl::optional<typename ForeverStack<N>::ConstDfsResult>
+gcc::optional<typename ForeverStack<N>::ConstDfsResult>
 ForeverStack<N>::dfs (const ForeverStack<N>::Node &starting_point,
 		      NodeId to_find) const
 {
@@ -584,11 +584,11 @@ ForeverStack<N>::dfs (const ForeverStack<N>::Node &starting_point,
 	return candidate;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 template <Namespace N>
-tl::optional<Rib &>
+gcc::optional<Rib &>
 ForeverStack<N>::dfs_rib (ForeverStack<N>::Node &starting_point, NodeId to_find)
 {
   return dfs_node (starting_point, to_find).map ([] (Node &x) -> Rib & {
@@ -597,7 +597,7 @@ ForeverStack<N>::dfs_rib (ForeverStack<N>::Node &starting_point, NodeId to_find)
 }
 
 template <Namespace N>
-tl::optional<const Rib &>
+gcc::optional<const Rib &>
 ForeverStack<N>::dfs_rib (const ForeverStack<N>::Node &starting_point,
 			  NodeId to_find) const
 {
@@ -606,7 +606,7 @@ ForeverStack<N>::dfs_rib (const ForeverStack<N>::Node &starting_point,
 }
 
 template <Namespace N>
-tl::optional<typename ForeverStack<N>::Node &>
+gcc::optional<typename ForeverStack<N>::Node &>
 ForeverStack<N>::dfs_node (ForeverStack<N>::Node &starting_point,
 			   NodeId to_find)
 {
@@ -628,11 +628,11 @@ ForeverStack<N>::dfs_node (ForeverStack<N>::Node &starting_point,
 	return candidate;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 template <Namespace N>
-tl::optional<const typename ForeverStack<N>::Node &>
+gcc::optional<const typename ForeverStack<N>::Node &>
 ForeverStack<N>::dfs_node (const ForeverStack<N>::Node &starting_point,
 			   NodeId to_find) const
 {
@@ -647,11 +647,11 @@ ForeverStack<N>::dfs_node (const ForeverStack<N>::Node &starting_point,
 	return candidate;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 template <Namespace N>
-tl::optional<typename ForeverStack<N>::Node &>
+gcc::optional<typename ForeverStack<N>::Node &>
 ForeverStack<N>::check_cache (NodeId to_find)
 {
   auto entry = dfs_cache.find (to_find);
@@ -659,7 +659,7 @@ ForeverStack<N>::check_cache (NodeId to_find)
   if (entry != dfs_cache.end ())
     return entry->second;
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 template <Namespace N>
@@ -670,14 +670,14 @@ ForeverStack<N>::cache (NodeId found, typename ForeverStack<N>::Node &result)
 }
 
 template <Namespace N>
-tl::optional<Rib &>
+gcc::optional<Rib &>
 ForeverStack<N>::to_rib (NodeId rib_id)
 {
   return dfs_rib (root, rib_id);
 }
 
 template <Namespace N>
-tl::optional<const Rib &>
+gcc::optional<const Rib &>
 ForeverStack<N>::to_rib (NodeId rib_id) const
 {
   return dfs_rib (root, rib_id);
@@ -759,7 +759,7 @@ ForeverStack<N>::is_module_descendant (NodeId parent, NodeId child) const
   return dfs_node (dfs_node (root, parent).value (), child).has_value ();
 }
 
-static tl::expected<Definition, LookupFinalizeError>
+static gcc::expected<Definition, LookupFinalizeError>
 find_leaf_definition_inner (const Usage &key,
 			    const std::map<Usage, Definition> &resolved_nodes,
 			    std::set<Usage> &keys_seen)
@@ -768,10 +768,10 @@ find_leaf_definition_inner (const Usage &key,
   auto possible_import = Usage (original_definition->second.id);
 
   if (original_definition == resolved_nodes.end ())
-    return tl::make_unexpected (LookupFinalizeError::NoDefinition);
+    return gcc::make_unexpected (LookupFinalizeError::NoDefinition);
 
   if (!keys_seen.insert (key).second)
-    return tl::make_unexpected (LookupFinalizeError::Loop);
+    return gcc::make_unexpected (LookupFinalizeError::Loop);
 
   if (resolved_nodes.find (possible_import) == resolved_nodes.end ())
     return original_definition->second;
@@ -784,7 +784,7 @@ find_leaf_definition_inner (const Usage &key,
 }
 
 template <Namespace N>
-tl::expected<Definition, LookupFinalizeError>
+gcc::expected<Definition, LookupFinalizeError>
 ForeverStack<N>::find_leaf_definition (const NodeId &key) const
 {
   std::set<Usage> keys_seen;

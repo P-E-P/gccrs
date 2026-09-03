@@ -245,7 +245,7 @@ TypeCheckBase::resolve_trait_path (HIR::TypePath &path)
 TyTy::TypeBoundPredicate
 TypeCheckBase::get_predicate_from_bound (
   HIR::TypePath &type_path,
-  tl::optional<std::reference_wrapper<HIR::Type>> associated_self,
+  gcc::optional<std::reference_wrapper<HIR::Type>> associated_self,
   BoundPolarity polarity, bool is_qualified_type_path, bool is_super_trait)
 {
   TyTy::TypeBoundPredicate lookup = TyTy::TypeBoundPredicate::error ();
@@ -614,7 +614,7 @@ TypeBoundPredicate::contains_item (const std::string &search) const
   return trait_ref->lookup_trait_item (search, &trait_item_ref);
 }
 
-tl::optional<TypeBoundPredicateItem>
+gcc::optional<TypeBoundPredicateItem>
 TypeBoundPredicate::lookup_associated_item (const std::string &search) const
 {
   auto trait_ref = get ();
@@ -630,7 +630,7 @@ TypeBoundPredicate::lookup_associated_item (const std::string &search) const
 	return lookup;
     }
 
-  return tl::nullopt;
+  return gcc::nullopt;
 }
 
 TypeBoundPredicateItem::TypeBoundPredicateItem (
@@ -671,7 +671,7 @@ TypeBoundPredicateItem::get_parent () const
   return &parent;
 }
 
-tl::optional<TypeBoundPredicateItem>
+gcc::optional<TypeBoundPredicateItem>
 TypeBoundPredicate::lookup_associated_item (
   const Resolver::TraitItemReference *ref) const
 {
@@ -823,7 +823,7 @@ TypeBoundPredicate::get_trait_hierachy (
 TypeBoundPredicateItem
 TypeBoundPredicate::lookup_associated_type (const std::string &search)
 {
-  tl::optional<TypeBoundPredicateItem> item = lookup_associated_item (search);
+  gcc::optional<TypeBoundPredicateItem> item = lookup_associated_item (search);
 
   // only need to check that it is infact an associated type because other
   // wise if it was not found it will just be an error node anyway

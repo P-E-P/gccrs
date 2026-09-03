@@ -17,7 +17,7 @@
 // <http://www.gnu.org/licenses/>.
 
 #include "rust-name-resolution-context.h"
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-mapping-common.h"
 #include "rust-rib.h"
 #include "rust-system.h"
@@ -211,7 +211,7 @@ NameResolutionContext::NameResolutionContext ()
     mappings (Analysis::Mappings::get ()), canonical_ctx (*this)
 {}
 
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 NameResolutionContext::insert (Identifier name, NodeId id, Namespace ns)
 {
   switch (ns)
@@ -229,7 +229,7 @@ NameResolutionContext::insert (Identifier name, NodeId id, Namespace ns)
     }
 }
 
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 NameResolutionContext::insert_variant (Identifier name, NodeId id,
 				       bool is_also_value)
 {
@@ -239,7 +239,7 @@ NameResolutionContext::insert_variant (Identifier name, NodeId id,
   return res;
 }
 
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 NameResolutionContext::insert_shadowable (Identifier name, NodeId id,
 					  Namespace ns)
 {
@@ -258,7 +258,7 @@ NameResolutionContext::insert_shadowable (Identifier name, NodeId id,
     }
 }
 
-tl::expected<NodeId, DuplicateNameError>
+gcc::expected<NodeId, DuplicateNameError>
 NameResolutionContext::insert_globbed (Identifier name, NodeId id, Namespace ns)
 {
   switch (ns)
@@ -298,7 +298,7 @@ NameResolutionContext::map_usage (Usage usage, Definition definition,
     }
 }
 
-tl::optional<NodeId>
+gcc::optional<NodeId>
 NameResolutionContext::lookup (NodeId usage, Namespace ns) const
 {
   switch (ns)
@@ -316,7 +316,7 @@ NameResolutionContext::lookup (NodeId usage, Namespace ns) const
     }
 }
 
-tl::optional<NameResolutionContext::NSLookup>
+gcc::optional<NameResolutionContext::NSLookup>
 NameResolutionContext::lookup (NodeId usage, Namespace ns1, Namespace ns2) const
 {
   if (auto result = lookup (usage, ns1))
@@ -327,7 +327,7 @@ NameResolutionContext::lookup (NodeId usage, Namespace ns1, Namespace ns2) const
   });
 }
 
-tl::optional<NameResolutionContext::NSLookup>
+gcc::optional<NameResolutionContext::NSLookup>
 NameResolutionContext::lookup (NodeId usage, Namespace ns1, Namespace ns2,
 			       Namespace ns3) const
 {
@@ -342,7 +342,7 @@ NameResolutionContext::lookup (NodeId usage, Namespace ns1, Namespace ns2,
 void
 NameResolutionContext::scoped (Rib::Kind rib_kind, NodeId id,
 			       std::function<void (void)> lambda,
-			       tl::optional<Identifier> path)
+			       gcc::optional<Identifier> path)
 {
   // NOTE: You must be at the root node when pushing the prelude rib.
   values.push (rib_kind, id, path);
@@ -362,7 +362,7 @@ void
 NameResolutionContext::scoped (Rib::Kind rib_kind, Namespace ns,
 			       NodeId scope_id,
 			       std::function<void (void)> lambda,
-			       tl::optional<Identifier> path)
+			       gcc::optional<Identifier> path)
 {
   // This could work... I'm not sure why you would want to do this though.
   rust_assert (rib_kind != Rib::Kind::Prelude);

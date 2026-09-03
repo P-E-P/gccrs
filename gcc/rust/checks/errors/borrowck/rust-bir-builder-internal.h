@@ -665,13 +665,13 @@ protected:
  * possibly null pointers.
  */
 template <typename T>
-tl::optional<T>
+gcc::optional<T>
 optional_from_ptr (T ptr)
 {
   if (ptr != nullptr)
     return {ptr};
   else
-    return tl::nullopt;
+    return gcc::nullopt;
 }
 
 } // namespace BIR

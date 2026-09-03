@@ -262,7 +262,7 @@ PatternBindingBuilder::visit (HIR::TupleStructPattern &pattern)
 {
   SavedState saved (this);
 
-  type_annotation = tl::nullopt;
+  type_annotation = gcc::nullopt;
 
   auto type = lookup_type (pattern);
 

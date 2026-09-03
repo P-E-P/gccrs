@@ -19,7 +19,7 @@
 #ifndef RUST_COMPILE_CONTEXT
 #define RUST_COMPILE_CONTEXT
 
-#include "optional.h"
+#include "stdbackport/optional"
 #include "rust-system.h"
 #include "rust-compile-drop-candidate.h"
 #include "rust-hir-map.h"
@@ -270,11 +270,11 @@ public:
     compiled_break_labels[id] = label;
   }
 
-  tl::optional<tree> lookup_break_label (HirId id)
+  gcc::optional<tree> lookup_break_label (HirId id)
   {
     auto it = compiled_break_labels.find (id);
     if (it == compiled_break_labels.end ())
-      return tl::nullopt;
+      return gcc::nullopt;
     return it->second;
   }
 
@@ -283,11 +283,11 @@ public:
     compiled_continue_labels[id] = label;
   }
 
-  tl::optional<tree> lookup_continue_label (HirId id)
+  gcc::optional<tree> lookup_continue_label (HirId id)
   {
     auto it = compiled_continue_labels.find (id);
     if (it == compiled_continue_labels.end ())
-      return tl::nullopt;
+      return gcc::nullopt;
     return it->second;
   }
 

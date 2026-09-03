@@ -31,7 +31,7 @@
 #include "coretypes.h"
 #include "options.h"
 
-#include "optional.h"
+#include "stdbackport/optional"
 
 namespace Rust {
 // parser forward decl
@@ -52,7 +52,7 @@ struct TargetOptions
 {
   /* TODO: maybe make private and access through helpers to allow changes to
    * impl */
-  std::unordered_map<std::string, std::unordered_set<tl::optional<std::string>>>
+  std::unordered_map<std::string, std::unordered_set<gcc::optional<std::string>>>
     features;
 
   enum class CrateType
@@ -80,7 +80,7 @@ public:
   {
     auto it = features.find (key);
     return it != features.end ()
-	   && it->second.find (tl::nullopt) != it->second.end ();
+	   && it->second.find (gcc::nullopt) != it->second.end ();
   }
 
   // Returns whether a key exists with the given value in the feature set.
@@ -140,10 +140,10 @@ public:
 	= features
 	    .insert (
 	      std::make_pair (std::move (key),
-			      std::unordered_set<tl::optional<std::string>> ()))
+			      std::unordered_set<gcc::optional<std::string>> ()))
 	    .first;
 
-    return it->second.insert (tl::nullopt).second;
+    return it->second.insert (gcc::nullopt).second;
   }
 
   // Inserts a key-value pair into the feature set.
@@ -156,7 +156,7 @@ public:
 	= features
 	    .insert (
 	      std::make_pair (std::move (key),
-			      std::unordered_set<tl::optional<std::string>> ()))
+			      std::unordered_set<gcc::optional<std::string>> ()))
 	    .first;
 
     it->second.insert (std::move (value));
@@ -502,7 +502,7 @@ public:
     NodeId node_id;
   };
 
-  tl::expected<LoadedCrate, LoadingError>
+  gcc::expected<LoadedCrate, LoadingError>
   load_extern_crate (const std::string &crate_name, location_t locus);
 
   int get_compat_version () const { return options.get_compat_version (); }
