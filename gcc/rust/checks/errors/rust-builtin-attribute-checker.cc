@@ -488,9 +488,8 @@ BuiltinAttributeChecker::visit (AST::Crate &crate)
 void
 BuiltinAttributeChecker::visit (AST::Attribute &attribute)
 {
-  lookup_handler (attribute.get_path ().as_string ()).map ([&] (auto handler) {
-    handler (attribute);
-  });
+  lookup_handler (attribute.get_path ().as_string ())
+    .transform ([&] (auto handler) { handler (attribute); });
   AST::DefaultASTVisitor::visit (attribute);
 }
 

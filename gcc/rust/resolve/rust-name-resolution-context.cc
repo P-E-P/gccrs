@@ -322,7 +322,7 @@ NameResolutionContext::lookup (NodeId usage, Namespace ns1, Namespace ns2) const
   if (auto result = lookup (usage, ns1))
     return NSLookup (*result, ns1);
 
-  return lookup (usage, ns2).map ([&ns2] (NodeId id) {
+  return lookup (usage, ns2).transform ([&ns2] (NodeId id) {
     return NSLookup (id, ns2);
   });
 }
@@ -334,7 +334,7 @@ NameResolutionContext::lookup (NodeId usage, Namespace ns1, Namespace ns2,
   if (auto result = lookup (usage, ns1, ns2))
     return result;
 
-  return lookup (usage, ns3).map ([&ns3] (NodeId id) {
+  return lookup (usage, ns3).transform ([&ns3] (NodeId id) {
     return NSLookup (id, ns3);
   });
 }

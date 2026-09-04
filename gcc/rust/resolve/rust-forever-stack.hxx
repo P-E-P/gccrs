@@ -591,7 +591,7 @@ template <Namespace N>
 gcc::optional<Rib &>
 ForeverStack<N>::dfs_rib (ForeverStack<N>::Node &starting_point, NodeId to_find)
 {
-  return dfs_node (starting_point, to_find).map ([] (Node &x) -> Rib & {
+  return dfs_node (starting_point, to_find).transform ([] (Node &x) -> Rib & {
     return x.rib (N);
   });
 }
