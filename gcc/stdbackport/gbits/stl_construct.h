@@ -126,11 +126,12 @@ namespace gcc
   using can_use_construct_at = and_<can_placement_new<G_Tp, G_Args...>,
 				    not_<is_unbounded_array<G_Tp>>>;
 
-  template<typename G_Tp, typename... G_Args>
-    constexpr std::enable_if_t<and_<can_use_construct_at<G_Tp, G_Args...>,
-				    std::is_array<G_Tp>>::value,
-			       G_Tp*>
-  construct_at (G_Tp* g_location, G_Args&&...)
+  template<typename G_Tp_, typename... G_Args,
+	   std::size_t N,
+	   typename G_Tp = G_Tp_[N],
+	   G_Requires<can_use_construct_at<G_Tp, G_Args...>> = false>
+    constexpr G_Tp*
+  construct_at (G_Tp (*g_location)[N], G_Args&&...)
   {
     void* g_loc = g_location;
     static_assert(sizeof...(G_Args) == 0, "std::construct_at for array "
@@ -138,10 +139,10 @@ namespace gcc
 		  "array");
     return ::new(g_loc) G_Tp[1]();
   }
-  template<typename G_Tp, typename... G_Args>
-    constexpr std::enable_if_t<and_<can_use_construct_at<G_Tp, G_Args...>,
-				    not_<std::is_array<G_Tp>>>::value,
-			       G_Tp*>
+  template<typename G_Tp, typename... G_Args,
+	   G_Requires<can_use_construct_at<G_Tp, G_Args...>> = false,
+	   G_Requires<not_<std::is_array<G_Tp>>> = false>
+    constexpr G_Tp*
   construct_at (G_Tp* g_location, G_Args&&... g_args)
   {
     void* g_loc = g_location;

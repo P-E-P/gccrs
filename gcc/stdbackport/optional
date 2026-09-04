@@ -169,14 +169,12 @@ namespace gcc
 	    : G_M_value(g_il, std::forward<G_Args>(g_args)...)
 	    { }
 
-#if __cplusplus >= 202002L
 	  template<typename G_Fn, typename G_Arg>
 	    constexpr
 	    G_Storage(G_Optional_func<G_Fn> g_f, G_Arg&& g_arg)
 	    : G_M_value(gcc::invoke(std::forward<G_Fn>(g_f.G_M_f),
 				     std::forward<G_Arg>(g_arg)))
 	    { }
-#endif
 
 #if __cpp_concepts >= 202002L // Conditionally trivial special member functions
 	  ~G_Storage() = default;
@@ -213,14 +211,12 @@ namespace gcc
 	    : G_M_value(g_il, std::forward<G_Args>(g_args)...)
 	    { }
 
-#if __cplusplus >= 202002L
 	  template<typename G_Fn, typename G_Arg>
 	    constexpr
 	    G_Storage(G_Optional_func<G_Fn> g_f, G_Arg&& g_arg)
 	    : G_M_value(gcc::invoke(std::forward<G_Fn>(g_f.G_M_f),
 				     std::forward<G_Arg>(g_arg)))
 	    { }
-#endif
 
 	  // User-provided destructor is needed when _Up has non-trivial dtor.
 	  ~G_Storage() { }
@@ -1289,8 +1285,8 @@ namespace gcc
       optional<G_Tp&>::value_or(G_Up&& g_u) const
       {
 	using G_Xp = std::remove_cv_t<G_Tp>;
-	static_assert(std::is_convertible<G_Tp&, G_Xp>::value);
-	static_assert(std::is_convertible<G_Up, G_Xp>::value);
+	static_assert(std::is_convertible<G_Tp&, G_Xp>::value, "");
+	static_assert(std::is_convertible<G_Up, G_Xp>::value, "");
 	if (G_M_val)
 	  return *G_M_val;
 	return std::forward<G_Up>(g_u);
