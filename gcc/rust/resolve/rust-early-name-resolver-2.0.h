@@ -227,12 +227,15 @@ private:
 	  resolved.emplace_back (new_def);
 	};
 
-    ctx.resolve_path (path, value_errors, Namespace::Values)
-      .transform (resolved_fn);
-    ctx.resolve_path (path, type_errors, Namespace::Types)
-      .transform (resolved_fn);
-    ctx.resolve_path (path, macro_errors, Namespace::Macros)
-      .transform (resolved_fn);
+    if (auto resolved_path
+	= ctx.resolve_path (path, value_errors, Namespace::Values))
+      resolved_fn (*resolved_path);
+    if (auto resolved_path
+	= ctx.resolve_path (path, type_errors, Namespace::Types))
+      resolved_fn (*resolved_path);
+    if (auto resolved_path
+	= ctx.resolve_path (path, macro_errors, Namespace::Macros))
+      resolved_fn (*resolved_path);
 
     if (!value_errors.empty () && !type_errors.empty ()
 	&& !macro_errors.empty ())

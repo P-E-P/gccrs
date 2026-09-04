@@ -87,7 +87,7 @@ Feature::as_name (const std::string &name)
 gcc::optional<std::reference_wrapper<const Feature>>
 Feature::lookup (const std::string &name)
 {
-  return as_name (name).map (
+  return as_name (name).transform (
     [] (Name n) { return std::ref (Feature::lookup (n)); });
 }
 

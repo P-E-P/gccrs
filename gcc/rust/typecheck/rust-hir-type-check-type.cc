@@ -316,8 +316,9 @@ TypeCheckType::resolve_root_path (HIR::TypePath &path, size_t *offset,
 	  auto &nr_ctx = Resolver2_0::FinalizedNameResolutionContext::get ();
 
 	  // assign the ref_node_id if we've found something
-	  nr_ctx.lookup (ast_node_id, Resolver2_0::Namespace::Types)
-	    .map ([&ref_node_id] (NodeId resolved) { ref_node_id = resolved; });
+	  if (auto resolved_nod_id
+	      = nr_ctx.lookup (ast_node_id, Resolver2_0::Namespace::Types))
+	    ref_node_id = *resolved_nod_id;
 
 	  // TODO: Should we add a special method to the name resolver to handle
 	  // that case? Resolving something in the Types NS when we want to

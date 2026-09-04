@@ -21,6 +21,7 @@
 
 #include "rust-edition.h"
 #include "stdbackport/optional"
+#include "rust-system.h"
 
 namespace Rust {
 

@@ -346,7 +346,7 @@ Early::visit (AST::MacroInvocation &invoc)
     = gcc::nullopt;
   if (path.get_segments ().size () == 1)
     ns_def = textual_scope.get (path.get_final_segment ().as_string ())
-	       .map ([] (NodeId id) {
+	       .transform ([] (NodeId id) {
 		 return NameResolutionContext::NamespacedDefinition (
 		   Rib::Definition::NonShadowable (id), Namespace::Macros);
 	       });
